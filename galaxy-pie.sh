@@ -50,8 +50,7 @@ _menu() {
 }
 
 _ls() {
-	mapfile -t myLibrary < <(wyvern ls | perl -pe 's:\ -\ (?!.*\ -\ ):;:g' | awk -F';' '{print $2 "\n" $1}')
-	myLibrary=("${myLibrary[@]:2}")
+	mapfile -t myLibrary < <(wyvern ls --json | jq --raw-output '.games[] | .[1,0]')
 
 	selectedGame=$(dialog --title "${title}" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
