@@ -127,7 +127,7 @@ _install(){
 	#need to make a start script for each game
 
 	clear
-	echo "${fileSelected}"
+	echo "${fileSelected}" #this shouldn't be here when this function works.
 	#_menu
 }
 
