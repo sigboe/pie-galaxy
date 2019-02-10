@@ -36,6 +36,7 @@ _depends() {
 		echo "dialog not installed."
 		exit 1
 	fi
+	#need to also check for dosbox
 }
 
 _menu() {
