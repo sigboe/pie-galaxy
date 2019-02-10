@@ -54,13 +54,7 @@ _ls() {
 
 	selectedGame=$(dialog --title "${title}" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
-	for i in "${!myLibrary[@]}"; do
-		if [[ "${myLibrary[$i]}" = "${selectedGame}" ]]; then
-			gameName="${i}"
-		fi
-	done
-
-	gameName="${myLibrary[$gameName+1]}"
+	gameName=$(wyvern ls --json | jq --raw-output --arg selectedGame $selectedGame '.games[] | select(. | index($selectedGame)) | .[0]')
 
 
 	_menu
@@ -86,7 +80,7 @@ _down() {
 	else
 		mkdir -p "${tmpdir}/${gameName}"
 		cd "${tmpdir}/${gameName}" || exit 1
-		wyvern down --id "${selectedGame}" --windows-auto
+		wyvern down --id "${selectedGame}" --windows-auto | read foo
 		dialog --title "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
 
