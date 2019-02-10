@@ -2,6 +2,7 @@
 
 title="Galaxy Pie"
 tmpdir="${HOME}/wyvern_tmp/"
+
 #version="0.1"
 
 # _usage() {
@@ -54,8 +55,7 @@ _ls() {
 
 	selectedGame=$(dialog --title "${title}" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
-	gameName=$(wyvern ls --json | jq --raw-output --arg selectedGame $selectedGame '.games[] | select(. | index($selectedGame)) | .[0]')
-
+	gameName=$(wyvern ls --json | jq --raw-output --argjson var $selectedGame '.games[] | select(. | index($var)) | .[0]')
 
 	_menu
 }
