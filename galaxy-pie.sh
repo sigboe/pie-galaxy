@@ -3,7 +3,7 @@
 title="Galaxy Pie"
 tmpdir="${HOME}/wyvern_tmp/"
 romdir="${HOME}/RetroPie/roms/pc"
-#version="0.1"
+#version="0.1" #set a version when the core function work
 
 # _usage() {
 # 	cat <<_EOF_ >&2
@@ -90,6 +90,8 @@ _down() {
 _checklogin(){
 	if ! [[ -f "${HOME}/.config/wyvern/wyvern.toml" ]]; then
 
+		#This here check doesnt work, need to check the file for the token too.
+
 		echo "Right now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login."
 
 		# url=$(timeout 1 wyvern ls | head -2 | tail -1)
@@ -114,11 +116,13 @@ _checklogin(){
 
 _about(){
 	dialog --title "${title}" --msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie. \n\n\n ${gameName}" 22 77
+	#this about screen can get a bit more detailed
 	_menu
 }
 
 _sync(){
 	dialog --title "${title}" --msgbox "This feature is not written yet for RetroPie." 22 77
+	#need to write a sync, maybe open a menu to check for games with support or something.
 	_menu
 }
 
@@ -132,7 +136,7 @@ _install(){
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 	dosboxarg=$(jq '.playTasks[] | select(.isPrimary==true) | .arguments' "${tmpdir}/${gameName}/goggame-*.info" | sed 's:\\\\:/:g')
 	mv "${tmpdir/${gameName}}" "${romdir}/"
-
+	#need to make a start script for each game
 
 	clear
 	echo "${fileSelected}"
