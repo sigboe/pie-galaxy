@@ -2,7 +2,7 @@
 
 title="Galaxy Pie"
 tmpdir="${HOME}/wyvern_tmp/"
-
+romdir="${HOME}/RetroPie/roms/pc"
 #version="0.1"
 
 # _usage() {
@@ -131,7 +131,7 @@ _install(){
 	rm -rf "${tmpdir}/commonappdata"
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 	dosboxarg=$(jq '.playTasks[] | select(.isPrimary==true) | .arguments' "${tmpdir}/${gameName}/goggame-*.info" | sed 's:\\\\:/:g')
-	
+	mv "${tmpdir/${gameName}}" "${romdir}/"
 
 
 	clear
