@@ -5,18 +5,6 @@ tmpdir="${HOME}/wyvern_tmp/"
 romdir="${HOME}/RetroPie/roms/pc"
 #version="0.1" #set a version when the core function work
 
-# _usage() {
-# 	cat <<_EOF_ >&2
-# Usage:
-# $(basename "$0")
-# _EOF_
-# 	exit "${1}"
-# }
-
-# _version() {
-# 	echo "$(basename "$0") ${version}"
-# 	exit "${1}"
-# }
 
 _depends() {
 	#wyvern needs cargo and libssl-dev
