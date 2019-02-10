@@ -81,7 +81,7 @@ _down() {
 		mkdir -p "${tmpdir}/${gameName}"
 		cd "${tmpdir}/${gameName}" || exit 1
 		wyvern down --id "${selectedGame}" --windows-auto
-		dialog --title "${title}" --msgbox "${gameName} finished downloading.\nFilename is ${filename}" 22 77
+		dialog --title "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
 
 	_menu
