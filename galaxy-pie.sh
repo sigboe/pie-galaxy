@@ -115,15 +115,16 @@ _sync(){
 }
 
 _install(){
-	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
+    fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
 
-	gameName=$(echo "${fileSelected}" | awk -F"/" '{print $(NF-1)}')
+    gameID=$(innoextract -s --gog-game-id "${fileSelected}")
+	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${selectedGame}" '.games[] | select(. | index($var)) | .[0]')
 
-	innoextract --gog --exclude-temp "${fileSelected}" --output-dir "${tmpdir}"
-	rm -rf "${tmpdir}/commonappdata"
+	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
+	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
-	dosboxarg=$(jq '.playTasks[] | select(.isPrimary==true) | .arguments' "${tmpdir}/${gameName}/goggame-*.info" | sed 's:\\\\:/:g')
-	mv "${tmpdir/${gameName}}" "${romdir}/"
+	dosboxarg=$(jq --raw-output '.playTasks[] | select(.isPrimary==true) | .arguments' "${tmpdir}/${gameName}/goggame-*.info" | sed 's:\\\\:/:g;s:\"::g')
+	mv "${tmpdir}/${gameName}" "${romdir}/"
 	#need to make a start script for each game
 
 	clear
