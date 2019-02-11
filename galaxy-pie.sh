@@ -118,7 +118,7 @@ _install(){
     fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
 
     gameID=$(innoextract -s --gog-game-id "${fileSelected}")
-	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${selectedGame}" '.games[] | select(. | index($var)) | .[0]')
+	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${gameID}" '.games[] | select(. | index($var)) | .[0]')
 
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
