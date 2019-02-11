@@ -123,7 +123,6 @@ _install(){
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
-	dosboxarg=$(jq --raw-output '.playTasks[] | select(.isPrimary==true) | .arguments' "${tmpdir}/${gameName}/goggame-*.info" | sed 's:\\\\:/:g;s:\"::g')
 	mv "${tmpdir}/${gameName}" "${romdir}/"
 	#need to make a start script for each game
 
