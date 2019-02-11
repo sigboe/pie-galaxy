@@ -124,7 +124,6 @@ _install(){
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 	mv "${tmpdir}/${gameName}" "${romdir}/"
-	#need to make a start script for each game
 
 	clear
 	echo "${fileSelected}" #this shouldn't be here when this function works.
