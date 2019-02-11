@@ -125,8 +125,13 @@ _install(){
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 	mv "${tmpdir}/${gameName}" "${romdir}/"
 	cd "${romdir}" || exit 1
-	ln -s "${basename%/*}/DOSBox-template.sh" "${gameName}.sh"
 
+	_getType "${gameName}"
+
+	if [[ "$type" = "dosbox" ]]; then
+		ln -s "${basename%/*}/DOSBox-template.sh" "${gameName}.sh"
+	fi
+	
 	clear
 	echo "${fileSelected}" #this shouldn't be here when this function works.
 	#_menu
