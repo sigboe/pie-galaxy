@@ -51,7 +51,6 @@ _ls() {
 
 _connect() {
 	availableGames=$(wyvern connect ls 2>&1)
-	#echo -e "${availableGames}"; exit
 	dialog --title "${title}" --yesno "Available games:\n\n${availableGames##*wyvern:\ } \n\nDo you want to claim the games?" 22 77
 	response="${?}"
 
