@@ -132,6 +132,25 @@ _install(){
 	#_menu
 }
 
+_getType(){
+
+	_path=$(cat "${1}"/goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
+
+	if [[ "${_path}" == *"DOSBOX"* ]]; then
+		 type="dosbox"
+	elif [[ "${_path}" == *"SCUMMVM"* ]]; then
+		 # not tested
+		 type="scummvm" 
+	elif [[ "${_path}" == *"neogeo"* ]]; then
+		 # Surly this wont work, but its a placeholder
+		 type="neogeo"
+	else
+		 echo "Didn't find what game it was."
+		 exit 1
+		 # can maybe detect and install some ports too.
+	fi
+	
+}
 
 _depends
 _checklogin
