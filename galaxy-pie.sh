@@ -3,6 +3,7 @@
 title="Galaxy Pie"
 tmpdir="${HOME}/wyvern_tmp/"
 romdir="${HOME}/RetroPie/roms/pc"
+basename=$(basename)
 #version="0.1" #set a version when the core function work
 
 
@@ -124,6 +125,8 @@ _install(){
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 	mv "${tmpdir}/${gameName}" "${romdir}/"
+	cd "${romdir}" || exit 1
+	ln -s "${basename%/*}/DOSBox-template.sh" "${gameName}.sh"
 
 	clear
 	echo "${fileSelected}" #this shouldn't be here when this function works.
