@@ -40,11 +40,11 @@ _menu() {
 }
 
 _ls() {
-	mapfile -t myLibrary < <(wyvern ls --json | jq --raw-output '.games[] | .[1,0]')
+	mapfile -t myLibrary < <(wyvern ls --json | jq --raw-output '.games[] | .ProductInfo | .id, .title')
 
 	selectedGame=$(dialog --title "${title}" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
-	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${selectedGame}" '.games[] | select(. | index($var)) | .[0]')
+	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 
 	_menu
 }
@@ -118,7 +118,7 @@ _install(){
     fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
 
     gameID=$(innoextract -s --gog-game-id "${fileSelected}")
-	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${gameID}" '.games[] | select(. | index($var)) | .[0]')
+	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
