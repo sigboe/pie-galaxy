@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-basename=$(basename "${0}")
-game="${basename%.sh}"
+game=$(basename "${0%.sh}")
 
 if ! [[ -x "$(command -v dosbox)" ]]; then
 	echo "DOSBox not installed."
