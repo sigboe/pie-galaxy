@@ -5,6 +5,7 @@ tmpdir="${HOME}/wyvern_tmp/"
 romdir="${HOME}/RetroPie/roms"
 wyvernls=$(wyvern ls --json)
 basename=$(basename "${0}")
+renderhtml="html2text"
 #version="0.1" #set a version when the core function work
 
 
@@ -27,6 +28,9 @@ _depends() {
 		echo "dialog not installed."
 		exit 1
 	fi
+	if ! [[ -x "$(command -v html2text)"]]; then
+		renderhtml="#sed s:\<br\>:\\n:g"
+	fi
 	#need to also check for dosbox
 }
 
@@ -48,7 +52,7 @@ _ls() {
 
 	if ! [[ -z "${selectedGame}" ]]; then
 		gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
-		gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | html2text )
+		gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | $renderhtml )
 
 		dialog --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
 	fi
