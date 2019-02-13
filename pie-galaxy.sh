@@ -60,7 +60,7 @@ _ls() {
 
 _connect() {
 	availableGames=$(wyvern connect ls 2>&1)
-	dialog --backtitle "${title}" --yesno "Available games:\n\n${availableGames##*wyvern:\ } \n\nDo you want to claim the games?" 22 77
+	dialog --backtitle "${title}" --yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" 22 77
 	response="${?}"
 
 	if [[ $response ]]; then
@@ -125,8 +125,7 @@ _sync() {
 _install() {
 	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
 
-	gameID=$(innoextract -s --gog-game-id "${fileSelected}")
-	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title')
+	gameName=$(innoextract --gog-game-id "${fileSelected}" | awk -F'"' '{print $2}' )
 
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
