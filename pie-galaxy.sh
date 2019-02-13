@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-title="Galaxy Pie"
+title="Pie Galaxy"
 tmpdir="${HOME}/wyvern_tmp/"
 romdir="${HOME}/RetroPie/roms"
 wyvernls=$(wyvern ls --json)
