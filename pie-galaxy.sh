@@ -72,7 +72,7 @@ _down() {
 	else
 		mkdir -p "${tmpdir}/${gameName}"
 		cd "${tmpdir}/${gameName}" || exit 1
-		wyvern down --id "${selectedGame}" --windows-auto
+		wyvern down --id "${selectedGame}" --force-windows
 		dialog --title "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
 
