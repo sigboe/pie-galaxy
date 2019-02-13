@@ -2,8 +2,9 @@
 
 title="Galaxy Pie"
 tmpdir="${HOME}/wyvern_tmp/"
-romdir="${HOME}/RetroPie/roms/pc"
-basename=$(basename)
+romdir="${HOME}/RetroPie/roms"
+wyvernls=$(wyvern ls --json)
+basename=$(basename "${0}")
 #version="0.1" #set a version when the core function work
 
 
