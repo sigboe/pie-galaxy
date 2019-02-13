@@ -86,7 +86,7 @@ _down() {
 }
 
 _checklogin(){
-	if ! [[ -f "${HOME}/.config/wyvern/wyvern.toml" ]]; then
+	if [[ -f "${HOME}/.config/wyvern/wyvern.toml" ]]; then
 
 		#This here check doesnt work, need to check the file for the token too.
 
