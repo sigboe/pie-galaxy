@@ -48,7 +48,7 @@ _ls() {
 
 	if ! [[ -z "${selectedGame}" ]]; then
 		gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
-	gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | sed s:\<br\>:\\n:g)
+		gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | html2text )
 
 		dialog --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
 	fi
