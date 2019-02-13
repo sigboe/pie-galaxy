@@ -128,7 +128,7 @@ _sync() {
 _install() {
 	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
 
-	gameName=$(innoextract --gog-game-id "${fileSelected}" | awk -F'"' '{print $2}' )
+	gameName=$(innoextract --gog-game-id "${fileSelected}" | awk -F'"' '{print $2}')
 
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
@@ -179,9 +179,9 @@ _exit() {
 	exit "${1}"
 }
 
-	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
-		joy2keyStart
-	fi
+if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
+	joy2keyStart
+fi
 
 _depends
 _checklogin
