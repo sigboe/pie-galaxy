@@ -36,7 +36,7 @@ _depends() {
 _menu() {
 	menuOptions=("connect" "Operations associated with GOG Connect." "down" "Download specific game." "install" "Install a GOG game from an installer." "ls" "List all games you own." "sync" "Sync a game's saves to a specific location for backup." "about" "About this program.")
 
-	selected=$(dialog --title "${title}" --cancel-label "Exit" --menu "Chose one" 22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
+	selected=$(dialog --backtitle "${title}" --cancel-label "Exit" --menu "Chose one" 22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
 
 	"_${selected:-exit}"
 	#echo -e "\n${selected}"
@@ -47,13 +47,13 @@ _ls() {
 	mapfile -t myLibrary < <(echo "${wyvernls}" | jq --raw-output '.games[] | .ProductInfo | .id, .title')
 
 	unset selectedGame
-	selectedGame=$(dialog --title "${title}" --ok-label "Details" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
+	selectedGame=$(dialog --backtitle "${title}" --ok-label "Details" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
 	if [[ -n "${selectedGame}" ]]; then
 		gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 		gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | $renderhtml )
 
-		dialog --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
+		dialog --backtitle "${title}" --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
 	fi
 
 	_menu
@@ -61,7 +61,7 @@ _ls() {
 
 _connect() {
 	availableGames=$(wyvern connect ls 2>&1)
-	dialog --title "${title}" --yesno "Available games:\n\n${availableGames##*wyvern:\ } \n\nDo you want to claim the games?" 22 77
+	dialog --backtitle "${title}" --yesno "Available games:\n\n${availableGames##*wyvern:\ } \n\nDo you want to claim the games?" 22 77
 	response="${?}"
 
 	if [[ $response ]]; then
@@ -73,13 +73,13 @@ _connect() {
 
 _down() {
 	if [[ -z ${selectedGame} ]]; then
-		dialog --title "${title}" --msgbox "No game selected, please use ls to list all games you own." 22 77
+		dialog --backtitle "${title}" --msgbox "No game selected, please use ls to list all games you own." 22 77
 		_menu
 	else
 		mkdir -p "${tmpdir}/${gameName}"
 		cd "${tmpdir}/${gameName}" || exit 1
 		wyvern down --id "${selectedGame}" --force-windows
-		dialog --title "${title}" --msgbox "${gameName} finished downloading." 22 77
+		dialog --backtitle "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
 
 	_menu
@@ -115,13 +115,13 @@ _checklogin(){
 }
 
 _about(){
-	dialog --title "${title}" --msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." 22 77
+	dialog --backtitle "${title}" --msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." 22 77
 	#this about screen can get a bit more detailed
 	_menu
 }
 
 _sync(){
-	dialog --title "${title}" --msgbox "This feature is not written yet for RetroPie." 22 77
+	dialog --backtitle "${title}" --msgbox "This feature is not written yet for RetroPie." 22 77
 	#need to write a sync, maybe open a menu to check for games with support or something.
 	_menu
 }
