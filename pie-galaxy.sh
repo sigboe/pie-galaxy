@@ -87,11 +87,13 @@ _down() {
 
 _checklogin(){
 	if [[ -f "${HOME}/.config/wyvern/wyvern.toml" ]]; then
-
-		#This here check doesnt work, need to check the file for the token too.
-
-		echo "Right now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login."
-
+		if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
+			wyvernls=$(wyvern ls --json)
+		else
+			echo "Right now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login."
+			exit 1
+		fi
+	fi
 		# url=$(timeout 1 wyvern ls | head -2 | tail -1)
 
 		# curl --cookie-jar cjar --output /dev/null "${url}"
@@ -108,10 +110,6 @@ _checklogin(){
 		#wyvern ls
 
 		#try something fancy here, want to open a terminal based webbrowser, and fetch the token from the URL name and pass it back to wyvern
-
-		wyvernls=$(wyvern ls --json)
-
-	fi
 }
 
 _about(){
