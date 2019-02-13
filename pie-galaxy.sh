@@ -43,12 +43,15 @@ _menu() {
 _ls() {
 	mapfile -t myLibrary < <(echo "${wyvernls}" | jq --raw-output '.games[] | .ProductInfo | .id, .title')
 
-	selectedGame=$(dialog --title "${title}" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
+	unset selectedGame
+	selectedGame=$(dialog --title "${title}" --ok-label "Details" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
-	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
+	if ! [[ -z "${selectedGame}" ]]; then
+		gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 	gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | sed s:\<br\>:\\n:g)
 
-	dialog --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
+		dialog --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
+	fi
 
 	_menu
 }
