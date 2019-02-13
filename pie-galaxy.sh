@@ -41,7 +41,7 @@ _menu() {
 }
 
 _ls() {
-	mapfile -t myLibrary < <(wyvern ls --json | jq --raw-output '.games[] | .ProductInfo | .id, .title')
+	mapfile -t myLibrary < <(echo "${wyvernls}" | jq --raw-output '.games[] | .ProductInfo | .id, .title')
 
 	selectedGame=$(dialog --title "${title}" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
@@ -119,7 +119,7 @@ _install(){
     fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
 
     gameID=$(innoextract -s --gog-game-id "${fileSelected}")
-	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title')
+	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
