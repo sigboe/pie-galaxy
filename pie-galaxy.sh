@@ -127,13 +127,17 @@ _install(){
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
-	mv "${tmpdir}/${gameName}" "${romdir}/"
-	cd "${romdir}" || exit 1
 
 	_getType "${gameName}"
 
-	if [[ "$type" = "dosbox" ]]; then
+	if [[ "$type" == "dosbox" ]]; then
+		mv "${tmpdir}/${gameName}" "${romdir}/pc"
+		cd "${romdir}" || exit 1
 		ln -s "${basename%/*}/DOSBox-template.sh" "${gameName}.sh"
+	elif [[ "$type" == "scummvm" ]]; then
+		mv "${tmpdir}/${gameName}" "${romdir}/scummvm"
+		cd "${romdir}" || exit 1
+		ln -s "${basename%/*}/ScummVM-template.sh" "${gameName}.sh"
 	fi
 	
 	clear
