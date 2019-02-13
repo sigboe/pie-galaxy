@@ -45,7 +45,10 @@ _ls() {
 
 	selectedGame=$(dialog --title "${title}" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
-	gameName=$(wyvern ls --json | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
+	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
+	gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | sed s:\<br\>:\\n:g)
+
+	dialog --title "${gameName}" --msgbox "${gameDescription}" 22 77
 
 	_menu
 }
@@ -69,7 +72,7 @@ _down() {
 	else
 		mkdir -p "${tmpdir}/${gameName}"
 		cd "${tmpdir}/${gameName}" || exit 1
-		wyvern down --id "${selectedGame}" --force-windows
+		wyvern down --id "${selectedGame}" --windows-auto
 		dialog --title "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
 
