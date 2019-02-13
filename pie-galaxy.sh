@@ -29,6 +29,9 @@ _depends() {
 	if ! [[ -x "$(command -v html2text)" ]]; then
 		renderhtml="#sed s:\<br\>:\\n:g"
 	fi
+	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
+		source ~/RetroPie-Setup/scriptmodules/helpers.sh
+	fi
 	#need to also check for dosbox
 }
 
@@ -76,7 +79,7 @@ _down() {
 		_menu
 	else
 		mkdir -p "${tmpdir}/${gameName}"
-		cd "${tmpdir}/${gameName}" || exit 1
+		cd "${tmpdir}/${gameName}" || _exit 1
 		wyvern down --id "${selectedGame}" --force-windows
 		dialog --backtitle "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
@@ -90,7 +93,7 @@ _checklogin() {
 			wyvernls=$(wyvern ls --json)
 		else
 			echo "Right now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login."
-			exit 1
+			_exit 1
 		fi
 	fi
 	# url=$(timeout 1 wyvern ls | head -2 | tail -1)
@@ -135,11 +138,11 @@ _install() {
 
 	if [[ "$type" == "dosbox" ]]; then
 		mv "${tmpdir}/${gameName}" "${romdir}/pc"
-		cd "${romdir}" || exit 1
+		cd "${romdir}" || _exit 1
 		ln -s "${basename%/*}/DOSBox-template.sh" "${gameName}.sh"
 	elif [[ "$type" == "scummvm" ]]; then
 		mv "${tmpdir}/${gameName}" "${romdir}/scummvm"
-		cd "${romdir}" || exit 1
+		cd "${romdir}" || _exit 1
 		ln -s "${basename%/*}/ScummVM-template.sh" "${gameName}.sh"
 	fi
 
@@ -170,9 +173,17 @@ _getType() {
 
 _exit() {
 	clear
-	exit 0
+	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
+		joy2keyStop
+	fi
+	exit "${1}"
 }
+
+	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
+		joy2keyStart
+	fi
 
 _depends
 _checklogin
 _menu
+_exit
