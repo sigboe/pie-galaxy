@@ -3,7 +3,6 @@
 title="Pie Galaxy"
 tmpdir="${HOME}/wyvern_tmp/"
 romdir="${HOME}/RetroPie/roms"
-wyvernls=$(wyvern ls --json)
 basename=$(basename "${0}")
 renderhtml="html2text"
 #version="0.1" #set a version when the core function work
@@ -109,6 +108,8 @@ _checklogin(){
 		#wyvern ls
 
 		#try something fancy here, want to open a terminal based webbrowser, and fetch the token from the URL name and pass it back to wyvern
+
+		wyvernls=$(wyvern ls --json)
 
 	fi
 }
