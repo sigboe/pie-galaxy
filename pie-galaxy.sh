@@ -31,7 +31,7 @@ _depends() {
 }
 
 _menu() {
-	menuOptions=("connect" "Operations associated with GOG Connect." "down" "Download specific game" "install" "Install a GOG game from an installer." "ls" "List all games you own" "sync" "Sync a game's saves to a specific location for backup" "about" "About this program.")
+	menuOptions=("connect" "Operations associated with GOG Connect." "down" "Download specific game." "install" "Install a GOG game from an installer." "ls" "List all games you own." "sync" "Sync a game's saves to a specific location for backup." "about" "About this program.")
 
 	selected=$(dialog --title "${title}" --cancel-label "Exit" --menu "Chose one" 22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
 
