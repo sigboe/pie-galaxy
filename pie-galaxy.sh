@@ -27,7 +27,7 @@ _depends() {
 		echo "dialog not installed."
 		exit 1
 	fi
-	if ! [[ -x "$(command -v html2text)"]]; then
+	if ! [[ -x "$(command -v html2text)" ]]; then
 		renderhtml="#sed s:\<br\>:\\n:g"
 	fi
 	#need to also check for dosbox
