@@ -49,7 +49,7 @@ _ls() {
 	unset selectedGame
 	selectedGame=$(dialog --title "${title}" --ok-label "Details" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
-	if ! [[ -z "${selectedGame}" ]]; then
+	if [[ -z "${selectedGame}" ]]; then
 		gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 		gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | $renderhtml )
 
