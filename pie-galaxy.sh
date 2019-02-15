@@ -134,7 +134,8 @@ _install() {
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 
-	_getType "${gameName}"
+	local type
+	type=$(_getType "${gameName}")
 
 	if [[ "$type" == "dosbox" ]]; then
 		mv "${tmpdir}/${gameName}" "${romdir}/pc"
@@ -153,14 +154,16 @@ _install() {
 
 _getType() {
 
-	_path=$(cat "${1}"/goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
+	local gamePath
+	gamePath=$(cat "${1}"/goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
 
-	if [[ "${_path}" == *"DOSBOX"* ]]; then
+	local type
+	if [[ "${gamePath}" == *"DOSBOX"* ]]; then
 		type="dosbox"
-	elif [[ "${_path}" == *"SCUMMVM"* ]]; then
+	elif [[ "${gamePath}" == *"SCUMMVM"* ]]; then
 		# not tested
 		type="scummvm"
-	elif [[ "${_path}" == *"neogeo"* ]]; then
+	elif [[ "${gamePath}" == *"neogeo"* ]]; then
 		# Surly this wont work, but its a placeholder
 		type="neogeo"
 	else
@@ -169,6 +172,7 @@ _getType() {
 		# can maybe detect and install some ports too.
 	fi
 
+	echo "${type}"
 }
 
 _exit() {
