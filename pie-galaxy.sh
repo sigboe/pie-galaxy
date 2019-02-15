@@ -126,9 +126,13 @@ _sync() {
 }
 
 _install() {
+	local fileSelected
 	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
 
+	local gameName
+	local gameID
 	gameName=$(innoextract --gog-game-id "${fileSelected}" | awk -F'"' '{print $2}')
+	gameID=$(innoextract -s --gog-game-id "${fileSelected}")
 
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
