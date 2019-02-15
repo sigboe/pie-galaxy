@@ -171,7 +171,7 @@ _getType() {
 		# Surly this wont work, but its a placeholder
 		type="neogeo"
 	else
-		dialog --title "${title}" --msgbox "Didn't find what game it was.\nNot installing." 22 77
+		dialog --backtitle "${title}" --msgbox "Didn't find what game it was.\nNot installing." 22 77
 		_menu
 		# can maybe detect and install some ports too.
 	fi
