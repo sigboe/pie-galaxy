@@ -29,7 +29,7 @@ _depends() {
 		exit 1
 	fi
 	if ! [[ -x "$(command -v html2text)" ]]; then
-		renderhtml="#sed s:\<br\>:\\n:g"
+		renderhtml="sed s:\<br\>:\\n:g"
 	fi
 	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
 		source ~/RetroPie-Setup/scriptmodules/helpers.sh
