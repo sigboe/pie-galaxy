@@ -78,8 +78,8 @@ _down() {
 		dialog --backtitle "${title}" --msgbox "No game selected, please use ls to list all games you own." 22 77
 		_menu
 	else
-		mkdir -p "${tmpdir}/${gameName}"
-		cd "${tmpdir}/${gameName}" || _exit 1
+		mkdir -p "${tmpdir}"
+		cd "${tmpdir}" || _exit 1
 		wyvern down --id "${selectedGame}" --force-windows
 		dialog --backtitle "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
