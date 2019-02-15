@@ -172,6 +172,9 @@ _install() {
 		mv "${tmpdir}/${gameName}" "${scummvmdir}"
 		cd "${romdir}" || _exit 1
 		ln -s "${basename%/*}/ScummVM-template.sh" "${gameName}.sh"
+	elif [[ "$type" == "unsupported" ]]; then
+		dialog --backtitle "${title}" --msgbox "${fileSelected} apperantly is unsupported." 22 77
+		_menu
 	fi
 
 
@@ -200,7 +203,7 @@ _getType() {
 		# can maybe detect and install some ports too.
 	fi
 
-	echo "${type}"
+	echo "${type:-unsupported}"
 }
 
 _exit() {
