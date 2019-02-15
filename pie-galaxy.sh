@@ -3,6 +3,8 @@
 title="Pie Galaxy"
 tmpdir="${HOME}/wyvern_tmp/"
 romdir="${HOME}/RetroPie/roms"
+dosboxdir="${romdir}/pc"
+scummvmdir="${romdir}/scummvm"
 basename=$(basename "${0}")
 renderhtml="html2text"
 #version="0.1" #set a version when the core function work
@@ -142,18 +144,19 @@ _install() {
 	type=$(_getType "${gameName}")
 
 	if [[ "$type" == "dosbox" ]]; then
-		mv "${tmpdir}/${gameName}" "${romdir}/pc"
+		mv "${tmpdir}/${gameName}" "${dosboxdir}"
 		cd "${romdir}" || _exit 1
 		ln -s "${basename%/*}/DOSBox-template.sh" "${gameName}.sh"
 	elif [[ "$type" == "scummvm" ]]; then
-		mv "${tmpdir}/${gameName}" "${romdir}/scummvm"
+		mv "${tmpdir}/${gameName}" "${scummvmdir}"
 		cd "${romdir}" || _exit 1
 		ln -s "${basename%/*}/ScummVM-template.sh" "${gameName}.sh"
 	fi
 
-	clear
-	echo "${fileSelected}" #this shouldn't be here when this function works.
-	#_menu
+
+	dialog --backtitle "${title}" --msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}" 22 77
+	_menu
+
 }
 
 _getType() {
