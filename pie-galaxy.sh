@@ -171,7 +171,7 @@ _install() {
 	elif [[ "$type" == "scummvm" ]]; then
 		mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
 		cd "${scummvmdir}" || _exit 1
-		ln -s "${scriptdir}/ScummVM-template.sh" "${gameName}.sh"
+		#ln -s "${scriptdir}/ScummVM-template.sh" "${gameName}.sh"
 	elif [[ "$type" == "unsupported" ]]; then
 		dialog --backtitle "${title}" --msgbox "${fileSelected} apperantly is unsupported." 22 77
 		_menu
