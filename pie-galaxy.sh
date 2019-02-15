@@ -54,13 +54,34 @@ _ls() {
 	selectedGame=$(dialog --backtitle "${title}" --ok-label "Details" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
 	if [[ -n "${selectedGame}" ]]; then
-		gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${selectedGame}" '.games[] | .ProductInfo | select(.id==$var) | .title')
-		gameDescription=$(curl -s "http://api.gog.com/products/${selectedGame}?expand=description" | jq --raw-output '.description | .full' | $renderhtml)
-
-		dialog --backtitle "${title}" --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
+		_description "${selectedGame}"
 	fi
 
 	_menu
+}
+
+_description() {
+	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .title')
+	gameDescription=$(curl -s "http://api.gog.com/products/${1}?expand=description" | jq --raw-output '.description | .full' | $renderhtml)
+	
+	local url
+	local page
+	url="$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .url' )"
+	page="$(curl -s "https://www.gog.com${url}")"
+
+    if echo "${page}" | grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox"; then
+        gameDescription="This game is powered by DOSBox\n\n${gameDescription}"
+
+    elif echo "${page}" | grep -q "This game is powered by <a href=http://scummvm.org>ScummVM"; then
+        gameDescription="This game is powered by ScummVM\n\n${gameDescription}"
+
+    else
+        gameDescription="${gameDescription}"
+
+    fi
+
+	dialog --backtitle "${title}" --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
+
 }
 
 _connect() {
