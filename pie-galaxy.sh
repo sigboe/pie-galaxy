@@ -208,7 +208,7 @@ _exit() {
 	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
 		joy2keyStop
 	fi
-	exit "${1}"
+	exit "${1:-0}"
 }
 
 if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
