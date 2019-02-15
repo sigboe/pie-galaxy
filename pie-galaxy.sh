@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 title="Pie Galaxy"
-tmpdir="${HOME}/wyvern_tmp/"
+tmpdir="${HOME}/wyvern_tmp"
 romdir="${HOME}/RetroPie/roms"
 dosboxdir="${romdir}/pc"
 scummvmdir="${romdir}/scummvm"
-basename=$(basename "${0}")
+scriptdir=$(pwd)
 renderhtml="html2text"
 #version="0.1" #set a version when the core function work
 
@@ -102,7 +102,7 @@ _down() {
 		_menu
 	else
 		mkdir -p "${tmpdir}"
-		cd "${tmpdir}" || _exit 1
+		cd "${tmpdir}/" || _exit 1
 		wyvern down --id "${selectedGame}" --force-windows
 		dialog --backtitle "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
@@ -150,7 +150,7 @@ _sync() {
 
 _install() {
 	local fileSelected
-	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}" 22 77)
+	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}/" 22 77)
 
 	local gameName
 	local gameID
@@ -158,20 +158,20 @@ _install() {
 	gameID=$(innoextract -s --gog-game-id "${fileSelected}")
 
 	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
-	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}"
+	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}/"
 	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 
 	local type
 	type=$(_getType "${gameName}")
 
 	if [[ "$type" == "dosbox" ]]; then
-		mv "${tmpdir}/${gameName}" "${dosboxdir}"
-		cd "${romdir}" || _exit 1
-		ln -s "${basename%/*}/DOSBox-template.sh" "${gameName}.sh"
+		mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
+		cd "${dosboxdir}" || _exit 1
+		ln -s "${scriptdir}/DOSBox-template.sh" "${gameName}.sh"
 	elif [[ "$type" == "scummvm" ]]; then
-		mv "${tmpdir}/${gameName}" "${scummvmdir}"
-		cd "${romdir}" || _exit 1
-		ln -s "${basename%/*}/ScummVM-template.sh" "${gameName}.sh"
+		mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
+		cd "${scummvmdir}" || _exit 1
+		ln -s "${scriptdir}/ScummVM-template.sh" "${gameName}.sh"
 	elif [[ "$type" == "unsupported" ]]; then
 		dialog --backtitle "${title}" --msgbox "${fileSelected} apperantly is unsupported." 22 77
 		_menu
@@ -186,7 +186,7 @@ _install() {
 _getType() {
 
 	local gamePath
-	gamePath=$(cat "${1}"/goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
+	gamePath=$(cat "${tmpdir}/${1}/"goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
 
 	local type
 	if [[ "${gamePath}" == *"DOSBOX"* ]]; then
@@ -207,7 +207,7 @@ _getType() {
 }
 
 _exit() {
-	clear
+	#clear
 	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
 		joy2keyStop
 	fi
