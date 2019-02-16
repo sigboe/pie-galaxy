@@ -7,6 +7,7 @@ dosboxdir="${romdir}/pc"
 scummvmdir="${romdir}/scummvm"
 wyvernbin="/home/pi/pie-galaxy/wyvern"
 innobin="$(command -v innoextract)"
+exceptions="${HOME}/pie-galaxy/exceptions.sh"
 #scriptdir=$(pwd)
 renderhtml="html2text"
 #version="0.1" #set a version when the core function work
@@ -76,8 +77,7 @@ _description() {
 	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 	gameDescription=$(curl -s "http://api.gog.com/products/${1}?expand=description" | jq --raw-output '.description | .full' | $renderhtml)
 	
-	local url
-	local page
+	local url page
 	url="$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .url' )"
 	page="$(curl -s "https://www.gog.com${url}")"
 
@@ -169,17 +169,13 @@ _sync() {
 }
 
 _install() {
-	local fileSelected
+	local fileSelected setupInfo gameName gameID response match type
 	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}/" 22 77)
 
 	if ! [[ -f "${fileSelected}" ]]; then
 		dialog --backtitle "${title}" --msgbox "No file was selected." 22 77
 	else
 
-		local setupInfo
-		local gameName
-		local gameID
-		local response
 		setupInfo=$("${innobin}" --gog-game-id "${fileSelected}")
 		gameName=$(echo "${setupInfo}" | awk -F'"' '{print $2}')
 		gameID=$("${innobin}" -s --gog-game-id "${fileSelected}")
@@ -190,11 +186,16 @@ _install() {
 			--yesno "${setupInfo}" \
 			22 77 || _menu
 
-		rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
-		"${innobin}" --gog --include app "${fileSelected}" --output-dir "${tmpdir}/"
-		mv "${tmpdir}/app" "${tmpdir}/${gameName}"
+		source "${exceptions}"
+		match=$(echo "${exceptionList[@]:0}" | grep -o "${gameID}")  
+		if [[ -n "${match}" ]]; then
+			_extract
+			"${gameID}_exception"
+			_menu
+		else
+		_extract
+		fi
 
-		local type
 		type=$(_getType "${gameName}")
 
 		if [[ "$type" == "dosbox" ]]; then
@@ -217,12 +218,18 @@ _install() {
 
 }
 
+_extract() {
+	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
+	"${innobin}" --gog --include app "${fileSelected}" --output-dir "${tmpdir}/" || (dialog --backtitle "${title}" --msgbox "ERROR: Unable to read setup file" 22 77; _menu)
+	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
+	true
+}
+
 _getType() {
 
-	local gamePath
+	local gamePath type
 	gamePath=$(cat "${tmpdir}/${1}/"goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
 
-	local type
 	if [[ "${gamePath}" == *"DOSBOX"* ]]; then
 		type="dosbox"
 	elif [[ "${gamePath}" == *"SCUMMVM"* ]]; then
