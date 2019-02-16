@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-emu="dosbox"
+dosboxromdir="${HOME}/RetroPie/roms/pc"
 game=$(basename "${0%.sh}")
 
-if [[ -x emu="/opt/retropie/emulators/dosbox/bin/dosbox" ]]; then
+if [[ -x "/opt/retropie/emulators/dosbox/bin/dosbox" ]]; then
 	emu="/opt/retropie/emulators/dosbox/bin/dosbox"
 fi
 
@@ -13,8 +13,8 @@ if ! [[ -x "$(command -v ${emu})" ]]; then
 fi
 
 echo "Launching ${game}"
-cd "${game}/DOSBOX" || exit 1
+cd "${dosboxromdir}/${game}/DOSBOX" || exit 1
 mapfile -t dosboxargs < <(jq --raw-output '.playTasks[] | select(.isPrimary==true) | .arguments' ../goggame-*.info | sed 's:\\:/:g;s:\"::g')
 echo "Found arugments: ${dosboxargs[*]}"
 
-"${emu}" ${dosboxargs[*]} 
+"${emu:-dosbox}" ${dosboxargs[*]}
