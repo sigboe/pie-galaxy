@@ -12,7 +12,7 @@ renderhtml="html2text"
 _depends() {
 	#wyvern needs cargo and libssl-dev
 	#wyvern needs $HOME/.cargo/bin in path
-	if ! [[ -x "$(command -v wyvern)" ]]; then
+	if ! [[ -x "/home/pi/pie-galaxy/wyvern" ]]; then
 		echo "Wyvern not installed."
 		exit 1
 	fi
@@ -30,9 +30,6 @@ _depends() {
 	fi
 	if ! [[ -x "$(command -v html2text)" ]]; then
 		renderhtml="sed s:\<br\>:\\n:g"
-	fi
-	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
-		source ~/RetroPie-Setup/scriptmodules/helpers.sh
 	fi
 	#need to also check for dosbox
 }
@@ -85,12 +82,12 @@ _description() {
 }
 
 _connect() {
-	availableGames=$(wyvern connect ls 2>&1)
+	availableGames=$(/home/pi/pie-galaxy/wyvern connect ls 2>&1)
 	dialog --backtitle "${title}" --yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" 22 77
 	response="${?}"
 
 	if [[ $response ]]; then
-		wyvern connect claim
+		/home/pi/pie-galaxy/wyvern connect claim
 	fi
 
 	_menu
@@ -103,7 +100,7 @@ _down() {
 	else
 		mkdir -p "${tmpdir}"
 		cd "${tmpdir}/" || _exit 1
-		wyvern down --id "${selectedGame}" --force-windows
+		/home/pi/pie-galaxy/wyvern down --id "${selectedGame}" --force-windows
 		dialog --backtitle "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
 
@@ -113,7 +110,7 @@ _down() {
 _checklogin() {
 	if [[ -f "${HOME}/.config/wyvern/wyvern.toml" ]]; then
 		if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
-			wyvernls=$(wyvern ls --json)
+			wyvernls=$(/home/pi/pie-galaxy/wyvern ls --json)
 		else
 			echo "Right now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login."
 			_exit 1
@@ -152,33 +149,37 @@ _install() {
 	local fileSelected
 	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}/" 22 77)
 
-	local gameName
-	local gameID
-	gameName=$(innoextract --gog-game-id "${fileSelected}" | awk -F'"' '{print $2}')
-	gameID=$(innoextract -s --gog-game-id "${fileSelected}")
+	if ! [[ -f "${fileSelected}" ]]; then
+		dialog --backtitle "${title}" --msgbox "No file was selected." 22 77
+	else
+		local gameName
+		local gameID
+		gameName=$(innoextract --gog-game-id "${fileSelected}" | awk -F'"' '{print $2}')
+		gameID=$(innoextract -s --gog-game-id "${fileSelected}")
 
-	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
-	innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}/"
-	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
+		rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
+		innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}/"
+		mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 
-	local type
-	type=$(_getType "${gameName}")
+		local type
+		type=$(_getType "${gameName}")
 
-	if [[ "$type" == "dosbox" ]]; then
-		mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
-		cd "${dosboxdir}" || _exit 1
-		ln -s "${scriptdir}/DOSBox-template.sh" "${gameName}.sh"
-	elif [[ "$type" == "scummvm" ]]; then
-		mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
-		cd "${scummvmdir}" || _exit 1
-		#ln -s "${scriptdir}/ScummVM-template.sh" "${gameName}.sh"
-	elif [[ "$type" == "unsupported" ]]; then
-		dialog --backtitle "${title}" --msgbox "${fileSelected} apperantly is unsupported." 22 77
-		_menu
+		if [[ "$type" == "dosbox" ]]; then
+			mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
+			cd "${dosboxdir}" || _exit 1
+			#ln -s "${scriptdir}/DOSBox-template.sh" "${gameName}.sh"
+		elif [[ "$type" == "scummvm" ]]; then
+			mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
+			cd "${scummvmdir}" || _exit 1
+			#ln -s "${scriptdir}/ScummVM-template.sh" "${gameName}.sh"
+		elif [[ "$type" == "unsupported" ]]; then
+			dialog --backtitle "${title}" --msgbox "${fileSelected} apperantly is unsupported." 22 77
+			_menu
+		fi
+
+		dialog --backtitle "${title}" --msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}" 22 77
 	fi
 
-
-	dialog --backtitle "${title}" --msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}" 22 77
 	_menu
 
 }
@@ -206,18 +207,22 @@ _getType() {
 	echo "${type:-unsupported}"
 }
 
+_joy2key() {
+	if [[ -f "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh" ]]; then
+		local scriptdir="/home/pi/RetroPie-Setup"
+		source "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
+		joy2keyStart
+	fi
+}
 _exit() {
 	#clear
-	if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
+	if [[ -f "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh" ]]; then
 		joy2keyStop
 	fi
 	exit "${1:-0}"
 }
 
-if [[ -x ~/RetroPie-Setup/scriptmodules/helpers.sh ]]; then
-	joy2keyStart
-fi
-
+_joy2key
 _depends
 _checklogin
 _menu
