@@ -179,11 +179,16 @@ _install() {
 		local setupInfo
 		local gameName
 		local gameID
+		local response
 		setupInfo=$("${innobin}" --gog-game-id "${fileSelected}")
 		gameName=$(echo "${setupInfo}" | awk -F'"' '{print $2}')
 		gameID=$("${innobin}" -s --gog-game-id "${fileSelected}")
 
-		dialog --backtitle "${title}" --title "${gameName}" --msgbox "${setupInfo}" 22 77
+		dialog \
+			--backtitle "${title}" \
+			--title "${gameName}" \
+			--yesno "${setupInfo}" \
+			22 77 || _menu
 
 		rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
 		"${innobin}" --gog --include app "${fileSelected}" --output-dir "${tmpdir}/"
@@ -243,7 +248,7 @@ _joy2key() {
 	fi
 }
 _exit() {
-	#clear
+	clear
 	if [[ -f "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh" ]]; then
 		joy2keyStop
 	fi
