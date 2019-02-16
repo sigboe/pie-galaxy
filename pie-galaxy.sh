@@ -5,18 +5,20 @@ tmpdir="${HOME}/wyvern_tmp"
 romdir="${HOME}/RetroPie/roms"
 dosboxdir="${romdir}/pc"
 scummvmdir="${romdir}/scummvm"
-scriptdir=$(pwd)
+wyvernbin="/home/pi/pie-galaxy/wyvern"
+innobin="$(command -v innoextract)"
+#scriptdir=$(pwd)
 renderhtml="html2text"
 #version="0.1" #set a version when the core function work
 
 _depends() {
 	#wyvern needs cargo and libssl-dev
 	#wyvern needs $HOME/.cargo/bin in path
-	if ! [[ -x "/home/pi/pie-galaxy/wyvern" ]]; then
+	if ! [[ -x "${wyvernbin}" ]]; then
 		echo "Wyvern not installed."
 		exit 1
 	fi
-	if ! [[ -x "$(command -v innoextract)" ]]; then
+	if ! [[ -x "${innobin}" ]]; then
 		echo "innoextract not installed."
 		exit 1
 	fi
@@ -35,9 +37,19 @@ _depends() {
 }
 
 _menu() {
-	menuOptions=("connect" "Operations associated with GOG Connect." "down" "Download specific game." "install" "Install a GOG game from an installer." "ls" "List all games you own." "sync" "Sync a game's saves to a specific location for backup." "about" "About this program.")
+	menuOptions=(
+		"connect" "Operations associated with GOG Connect." 
+		"down" "Download specific game." 
+		"install" "Install a GOG game from an installer." 
+		"ls" "List all games you own." 
+		"sync" "Sync a game's saves to a specific location for backup." 
+		"about" "About this program."
+		)
 
-	selected=$(dialog --backtitle "${title}" --cancel-label "Exit" --menu "Chose one" 22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
+	selected=$(dialog \
+		--backtitle "${title}" \
+		--cancel-label "Exit" \
+		--menu "Chose one" 22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
 
 	"_${selected:-exit}"
 	#echo -e "\n${selected}"
@@ -48,7 +60,10 @@ _ls() {
 	mapfile -t myLibrary < <(echo "${wyvernls}" | jq --raw-output '.games[] | .ProductInfo | .id, .title')
 
 	unset selectedGame
-	selectedGame=$(dialog --backtitle "${title}" --ok-label "Details" --menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
+	selectedGame=$(dialog \
+		--backtitle "${title}" \
+		--ok-label "Details" \
+		--menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&2 2>&1 1>&3)
 
 	if [[ -n "${selectedGame}" ]]; then
 		_description "${selectedGame}"
@@ -77,17 +92,25 @@ _description() {
 
     fi
 
-	dialog --backtitle "${title}" --title "${gameName}" --ok-label "Select" --msgbox "${gameDescription}" 22 77
+	dialog \
+		--backtitle "${title}" \
+		--title "${gameName}" \
+		--ok-label "Select" \
+		--msgbox "${gameDescription}" \
+		22 77
 
 }
 
 _connect() {
-	availableGames=$(/home/pi/pie-galaxy/wyvern connect ls 2>&1)
-	dialog --backtitle "${title}" --yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" 22 77
-	response="${?}"
+	availableGames=$("${wyvernbin}" connect ls 2>&1)
+
+	local response
+	response=$(dialog \
+	--backtitle "${title}" \
+	--yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" 22 77)
 
 	if [[ $response ]]; then
-		/home/pi/pie-galaxy/wyvern connect claim
+		"${wyvernbin}" connect claim
 	fi
 
 	_menu
@@ -100,7 +123,7 @@ _down() {
 	else
 		mkdir -p "${tmpdir}"
 		cd "${tmpdir}/" || _exit 1
-		/home/pi/pie-galaxy/wyvern down --id "${selectedGame}" --force-windows
+		"${wyvernbin}" down --id "${selectedGame}" --force-windows
 		dialog --backtitle "${title}" --msgbox "${gameName} finished downloading." 22 77
 	fi
 
@@ -110,7 +133,7 @@ _down() {
 _checklogin() {
 	if [[ -f "${HOME}/.config/wyvern/wyvern.toml" ]]; then
 		if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
-			wyvernls=$(/home/pi/pie-galaxy/wyvern ls --json)
+			wyvernls=$("${wyvernbin}" ls --json)
 		else
 			echo "Right now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login."
 			_exit 1
@@ -152,13 +175,18 @@ _install() {
 	if ! [[ -f "${fileSelected}" ]]; then
 		dialog --backtitle "${title}" --msgbox "No file was selected." 22 77
 	else
+
+		local setupInfo
 		local gameName
 		local gameID
-		gameName=$(innoextract --gog-game-id "${fileSelected}" | awk -F'"' '{print $2}')
-		gameID=$(innoextract -s --gog-game-id "${fileSelected}")
+		setupInfo=$("${innobin}" --gog-game-id "${fileSelected}")
+		gameName=$(echo "${setupInfo}" | awk -F'"' '{print $2}')
+		gameID=$("${innobin}" -s --gog-game-id "${fileSelected}")
+
+		dialog --backtitle "${title}" --title "${gameName}" --msgbox "${setupInfo}" 22 77
 
 		rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
-		innoextract --gog --include app "${fileSelected}" --output-dir "${tmpdir}/"
+		"${innobin}" --gog --include app "${fileSelected}" --output-dir "${tmpdir}/"
 		mv "${tmpdir}/app" "${tmpdir}/${gameName}"
 
 		local type
