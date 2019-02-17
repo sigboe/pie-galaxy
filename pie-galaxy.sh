@@ -203,8 +203,8 @@ _install() {
 		if [[ "$type" == "dosbox" ]]; then
 			mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
 		elif [[ "$type" == "scummvm" ]]; then
-			shortName=$(cat $(find "${tmpdir}/${gameName}" -name '*.ini') | grep gameid | awk -F= {'print $2'})
-			echo "${shortName}" > "${tmpdir}/${gameName}/${shortName}.svm"
+			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= {'print $2'} | sed -e "s/\r//g")
+			echo "${shortName}" > "${scummvmdir}/${shortName}.svm"
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
 			local extraMessage="To finish the installation and open ScummVM and add game."
 		elif [[ "$type" == "unsupported" ]]; then
