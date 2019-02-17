@@ -50,7 +50,8 @@ _menu() {
 	selected=$(dialog \
 		--backtitle "${title}" \
 		--cancel-label "Exit" \
-		--menu "Chose one" 22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
+		--menu "Chose one" \
+		22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
 
 	"_${selected:-exit}"
 	#echo -e "\n${selected}"
@@ -107,7 +108,8 @@ _connect() {
 	local response
 	response=$(dialog \
 		--backtitle "${title}" \
-		--yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" 22 77)
+		--yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" \
+		22 77)
 
 	if [[ $response ]]; then
 		"${wyvernbin}" connect claim
@@ -118,13 +120,19 @@ _connect() {
 
 _down() {
 	if [[ -z ${selectedGame} ]]; then
-		dialog --backtitle "${title}" --msgbox "No game selected, please use ls to list all games you own." 22 77
+		dialog \
+			--backtitle "${title}" \
+			--msgbox "No game selected, please use ls to list all games you own." \
+			22 77
 		_menu
 	else
 		mkdir -p "${tmpdir}"
 		cd "${tmpdir}/" || _exit 1
 		"${wyvernbin}" down --id "${selectedGame}" --force-windows
-		dialog --backtitle "${title}" --msgbox "${gameName} finished downloading." 22 77
+		dialog \
+			--backtitle "${title}" \
+			--msgbox "${gameName} finished downloading." \
+			22 77
 	fi
 
 	_menu
@@ -132,11 +140,11 @@ _down() {
 
 _checklogin() {
 	if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
-			wyvernls=$("${wyvernbin}" ls --json)
+		wyvernls=$("${wyvernbin}" ls --json)
 	else
 		dialog \
 			--backtitle "${title}" \
-			--msgbox 	"You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login." \
+			--msgbox "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login." \
 			22 77
 		_exit 1
 	fi
@@ -160,23 +168,30 @@ _checklogin() {
 _about() {
 	dialog \
 		--backtitle "${title}" \
-		--msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." 22 77
+		--msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." \
+		22 77
 	#this about screen can get a bit more detailed
 	_menu
 }
 
 _sync() {
-	dialog --backtitle "${title}" --msgbox "This feature is not written yet for RetroPie." 22 77
+	dialog \
+		--backtitle "${title}" \
+		--msgbox "This feature is not written yet for RetroPie." \
+		22 77
 	#need to write a sync, maybe open a menu to check for games with support or something.
 	_menu
 }
 
 _install() {
-	local fileSelected setupInfo gameName gameID response match type shortName 
+	local fileSelected setupInfo gameName gameID response match type shortName
 	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}/" 22 77)
 
 	if ! [[ -f "${fileSelected}" ]]; then
-		dialog --backtitle "${title}" --msgbox "No file was selected." 22 77
+		dialog \
+			--backtitle "${title}" \
+			--msgbox "No file was selected." \
+			22 77
 	else
 
 		setupInfo=$("${innobin}" --gog-game-id "${fileSelected}")
@@ -205,17 +220,21 @@ _install() {
 			mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
 		elif [[ "$type" == "scummvm" ]]; then
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= {'print $2'} | sed -e "s/\r//g")
-			echo "${shortName}" > "${scummvmdir}/${shortName}.svm"
+			echo "${shortName}" >"${scummvmdir}/${shortName}.svm"
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
 			local extraMessage="To finish the installation and open ScummVM and add game."
 		elif [[ "$type" == "unsupported" ]]; then
-			dialog --backtitle "${title}" --msgbox "${fileSelected} apperantly is unsupported." 22 77
+			dialog \
+				--backtitle "${title}" \
+				--msgbox "${fileSelected} apperantly is unsupported." \
+				22 77
 			_menu
 		fi
 
 		dialog \
 			--backtitle "${title}" \
-			--msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}\n\n${extraMessage}" 22 77
+			--msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}\n\n${extraMessage}" \
+			22 77
 	fi
 
 	_menu
@@ -227,7 +246,10 @@ _extract() {
 	local folder
 	rm -rf "${tmpdir}/output" #clean the extract path (is this okay to do like this?)
 	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" || (
-		dialog --backtitle "${title}" --msgbox "ERROR: Unable to read setup file" 22 77
+		dialog \
+			--backtitle "${title}" \
+			--msgbox "ERROR: Unable to read setup file" \
+			22 77
 		_menu
 	)
 	folder=$(dirname $(find ${tmpdir}/output -name 'goggame-*.info'))
@@ -248,7 +270,10 @@ _getType() {
 		# Surly this wont work, but its a placeholder
 		type="neogeo"
 	else
-		dialog --backtitle "${title}" --msgbox "Didn't find what game it was.\nNot installing." 22 77
+		dialog \
+			--backtitle "${title}" \
+			--msgbox "Didn't find what game it was.\nNot installing." \
+			22 77
 		_menu
 		# can maybe detect and install some ports too.
 	fi
