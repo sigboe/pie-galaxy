@@ -6,7 +6,7 @@ romdir="${HOME}/RetroPie/roms"
 dosboxdir="${romdir}/pc"
 scummvmdir="${romdir}/scummvm"
 wyvernbin="/home/pi/pie-galaxy/wyvern"
-innobin="$(command -v innoextract)"
+innobin="/home/pi/pie-galaxy/innoextract"
 exceptions="${HOME}/pie-galaxy/exceptions.sh"
 #scriptdir=$(pwd)
 renderhtml="html2text"
@@ -221,10 +221,12 @@ _install() {
 }
 
 _extract() {
-	rm -rf "${tmpdir}/app" #clean the extract path (is this okay to do like this?)
-	"${innobin}" --gog --include app "${fileSelected}" --output-dir "${tmpdir}/" || (dialog --backtitle "${title}" --msgbox "ERROR: Unable to read setup file" 22 77; _menu)
-	mv "${tmpdir}/app" "${tmpdir}/${gameName}"
-	true
+	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
+	local folder
+	rm -rf "${tmpdir}/output" #clean the extract path (is this okay to do like this?)
+	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" || (dialog --backtitle "${title}" --msgbox "ERROR: Unable to read setup file" 22 77; _menu)
+	folder=$(dirname $(find ${tmpdir}/output -name 'goggame-*.info'))
+	mv "${folder}" "${tmpdir}/${gameName}"
 }
 
 _getType() {
@@ -234,7 +236,7 @@ _getType() {
 
 	if [[ "${gamePath}" == *"DOSBOX"* ]]; then
 		type="dosbox"
-	elif [[ "${gamePath}" == *"SCUMMVM"* ]]; then
+	elif [[ "${gamePath}" == *"scummvm"* ]]; then
 		# not tested
 		type="scummvm"
 	elif [[ "${gamePath}" == *"neogeo"* ]]; then
