@@ -203,7 +203,7 @@ _install() {
 		if [[ "$type" == "dosbox" ]]; then
 			mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
 		elif [[ "$type" == "scummvm" ]]; then
-			shortName=$(cat $(find sky -name '*.ini') | grep gameid | awk -F= {'print $2'})
+			shortName=$(cat $(find "${tmpdir}/${gameName}" -name '*.ini') | grep gameid | awk -F= {'print $2'})
 			echo "${shortName}" > "${tmpdir}/${gameName}/${shortName}.svm"
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
 			local extraMessage="To finish the installation and open ScummVM and add game."
