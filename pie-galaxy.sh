@@ -171,7 +171,7 @@ _sync() {
 }
 
 _install() {
-	local fileSelected setupInfo gameName gameID response match type
+	local fileSelected setupInfo gameName gameID response match type shortName 
 	fileSelected=$(dialog --title "${title}" --stdout --fselect "${tmpdir}/" 22 77)
 
 	if ! [[ -f "${fileSelected}" ]]; then
@@ -202,18 +202,19 @@ _install() {
 
 		if [[ "$type" == "dosbox" ]]; then
 			mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
-			cd "${dosboxdir}" || _exit 1
-			#ln -s "${scriptdir}/DOSBox-template.sh" "${gameName}.sh"
 		elif [[ "$type" == "scummvm" ]]; then
+			shortName=$(cat $(find sky -name '*.ini') | grep gameid | awk -F= {'print $2'})
+			echo "${shortName}" > "${tmpdir}/${gameName}/${shortName}.svm"
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
-			cd "${scummvmdir}" || _exit 1
-			#ln -s "${scriptdir}/ScummVM-template.sh" "${gameName}.sh"
+			local extraMessage="To finish the installation and open ScummVM and add game."
 		elif [[ "$type" == "unsupported" ]]; then
 			dialog --backtitle "${title}" --msgbox "${fileSelected} apperantly is unsupported." 22 77
 			_menu
 		fi
 
-		dialog --backtitle "${title}" --msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}" 22 77
+		dialog \
+			--backtitle "${title}" \
+			--msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}\n\n${extraMessage}" 22 77
 	fi
 
 	_menu
