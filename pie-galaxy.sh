@@ -131,13 +131,14 @@ _down() {
 }
 
 _checklogin() {
-	if [[ -f "${HOME}/.config/wyvern/wyvern.toml" ]]; then
-		if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
+	if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
 			wyvernls=$("${wyvernbin}" ls --json)
-		else
-			echo "Right now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login."
-			_exit 1
-		fi
+	else
+		dialog \
+			--backtitle "${title}" \
+			--msgbox 	"You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login." \
+			22 77
+		_exit 1
 	fi
 	# url=$(timeout 1 wyvern ls | head -2 | tail -1)
 
