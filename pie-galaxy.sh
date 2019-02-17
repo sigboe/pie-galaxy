@@ -157,7 +157,9 @@ _checklogin() {
 }
 
 _about() {
-	dialog --backtitle "${title}" --msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." 22 77
+	dialog \
+	--backtitle "${title}" \
+	--msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." 22 77
 	#this about screen can get a bit more detailed
 	_menu
 }
