@@ -39,13 +39,13 @@ _depends() {
 
 _menu() {
 	menuOptions=(
-		"connect" "Operations associated with GOG Connect." 
-		"down" "Download specific game." 
-		"install" "Install a GOG game from an installer." 
-		"ls" "List all games you own." 
-		"sync" "Sync a game's saves to a specific location for backup." 
+		"connect" "Operations associated with GOG Connect."
+		"down" "Download specific game."
+		"install" "Install a GOG game from an installer."
+		"ls" "List all games you own."
+		"sync" "Sync a game's saves to a specific location for backup."
 		"about" "About this program."
-		)
+	)
 
 	selected=$(dialog \
 		--backtitle "${title}" \
@@ -76,21 +76,21 @@ _ls() {
 _description() {
 	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 	gameDescription=$(curl -s "http://api.gog.com/products/${1}?expand=description" | jq --raw-output '.description | .full' | $renderhtml)
-	
+
 	local url page
-	url="$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .url' )"
+	url="$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .url')"
 	page="$(curl -s "https://www.gog.com${url}")"
 
-    if echo "${page}" | grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox"; then
-        gameDescription="This game is powered by DOSBox\n\n${gameDescription}"
+	if echo "${page}" | grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox"; then
+		gameDescription="This game is powered by DOSBox\n\n${gameDescription}"
 
-    elif echo "${page}" | grep -q "This game is powered by <a href=http://scummvm.org>ScummVM"; then
-        gameDescription="This game is powered by ScummVM\n\n${gameDescription}"
+	elif echo "${page}" | grep -q "This game is powered by <a href=http://scummvm.org>ScummVM"; then
+		gameDescription="This game is powered by ScummVM\n\n${gameDescription}"
 
-    else
-        gameDescription="${gameDescription}"
+	else
+		gameDescription="${gameDescription}"
 
-    fi
+	fi
 
 	dialog \
 		--backtitle "${title}" \
@@ -106,8 +106,8 @@ _connect() {
 
 	local response
 	response=$(dialog \
-	--backtitle "${title}" \
-	--yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" 22 77)
+		--backtitle "${title}" \
+		--yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" 22 77)
 
 	if [[ $response ]]; then
 		"${wyvernbin}" connect claim
@@ -158,8 +158,8 @@ _checklogin() {
 
 _about() {
 	dialog \
-	--backtitle "${title}" \
-	--msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." 22 77
+		--backtitle "${title}" \
+		--msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." 22 77
 	#this about screen can get a bit more detailed
 	_menu
 }
@@ -189,13 +189,13 @@ _install() {
 			22 77 || _menu
 
 		source "${exceptions}"
-		match=$(echo "${exceptionList[@]:0}" | grep -o "${gameID}")  
+		match=$(echo "${exceptionList[@]:0}" | grep -o "${gameID}")
 		if [[ -n "${match}" ]]; then
 			_extract
 			"${gameID}_exception"
 			_menu
 		else
-		_extract
+			_extract
 		fi
 
 		type=$(_getType "${gameName}")
@@ -224,7 +224,10 @@ _extract() {
 	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 	local folder
 	rm -rf "${tmpdir}/output" #clean the extract path (is this okay to do like this?)
-	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" || (dialog --backtitle "${title}" --msgbox "ERROR: Unable to read setup file" 22 77; _menu)
+	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" || (
+		dialog --backtitle "${title}" --msgbox "ERROR: Unable to read setup file" 22 77
+		_menu
+	)
 	folder=$(dirname $(find ${tmpdir}/output -name 'goggame-*.info'))
 	mv "${folder}" "${tmpdir}/${gameName}"
 }
