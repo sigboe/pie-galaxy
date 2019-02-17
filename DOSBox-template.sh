@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 dosboxromdir="${HOME}/RetroPie/roms/pc"
-game=$(basename "${0%.sh}")
+game=$(basename -s .sh "${0}")
 
 if [[ -x "/opt/retropie/emulators/dosbox/bin/dosbox" ]]; then
 	emu="/opt/retropie/emulators/dosbox/bin/dosbox"
