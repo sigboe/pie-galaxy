@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-#
-#
-#
+# This application was made by https://github.com/sigboe
+# The License is GNU General Public License v3.0
+# https://github.com/sigboe/pie-galaxy/blob/master/LICENSE
 
 title="Pie Galaxy"
 tmpdir="${HOME}/tmp/piegalaxy"
@@ -16,8 +16,6 @@ renderhtml="html2text"
 version="0.1"
 
 _depends() {
-	#wyvern needs cargo and libssl-dev
-	#wyvern needs $HOME/.cargo/bin in path
 	if ! [[ -x "${wyvernbin}" ]]; then
 		echo "Wyvern not installed."
 		exit 1
@@ -56,8 +54,6 @@ _menu() {
 		22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
 
 	"_${selected:-exit}"
-	#echo -e "\n${selected}"
-	#printf '%s\n' "${menuOptions[@]}"
 }
 
 _ls() {
@@ -150,21 +146,6 @@ _checklogin() {
 			22 77
 		_exit 1
 	fi
-	# url=$(timeout 1 wyvern ls | head -2 | tail -1)
-
-	# curl --cookie-jar cjar --output /dev/null "${url}"
-
-	# curl --cookie cjar --cookie-jar cjar \
-	# 	--data "login[username]=${goguser}" \
-	# 	--data "login[password]=${gogpass}" \
-	# 	--data "form_id=login" \
-	# 	--location \
-	# 	--output login-result.html \
-	# 	"${url}/login_check"
-
-	#wyvern ls
-
-	#try something fancy here, want to open a terminal based webbrowser, and fetch the token from the URL name and pass it back to wyvern
 }
 
 _about() {
@@ -266,7 +247,6 @@ _getType() {
 	if [[ "${gamePath}" == *"DOSBOX"* ]]; then
 		type="dosbox"
 	elif [[ "${gamePath}" == *"scummvm"* ]]; then
-		# not tested
 		type="scummvm"
 	elif [[ "${gamePath}" == *"neogeo"* ]]; then
 		# Surly this wont work, but its a placeholder
@@ -277,7 +257,6 @@ _getType() {
 			--msgbox "Didn't find what game it was.\nNot installing." \
 			22 77
 		_menu
-		# can maybe detect and install some ports too.
 	fi
 
 	echo "${type:-unsupported}"
