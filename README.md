@@ -15,7 +15,7 @@ Se seperate document for now. Hopefully you will be able to install this program
 * Download any game you own
 * Install games ([See compatibility list](#compatiblity))
 
-# Compatiblity
+## Compatiblity
 
 * DOSBox games 
     * Every game I have tested thus far has worked
@@ -39,7 +39,7 @@ Se seperate document for now. Hopefully you will be able to install this program
 * Gamepad for more games
 * Automatic notification when Connect games are available
 
-## Research
+### Research
 
 * RecidualVM games
 * Native game: Jedi Outcast/Academy
