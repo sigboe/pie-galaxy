@@ -170,9 +170,8 @@ _checklogin() {
 _about() {
 	dialog \
 		--backtitle "${title}" \
-		--msgbox "This graphical user interface is made possible by Nico Hickman's Wyvern which is a terminal based GOG client. ${title} was developed to make make it useful on RetroPie." \
+		--msgbox "Version: ${version}\n\nA GOG client for RetroPie and other GNU/Linux distributions. It uses Wyvern to download and Innoextract to extract games. Pie Galaxy also provides a user interface navigatable by game controllers and will install games, in such a way that it will use native runtimes. It also uses Wyvern to let you claim games available from GOG Connect." \
 		22 77
-	#this about screen can get a bit more detailed
 	_menu
 }
 
