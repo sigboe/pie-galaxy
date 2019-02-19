@@ -6,7 +6,8 @@ Pie Galaxy does not support every game yet, and is not feature complete. And is 
 
 ## Installing
 
-Se seperate document for now. Hopefully you will be able to install this program from the RetroPie setup menu soon.
+Hopefully you will be able to install this program from the RetroPie setup menu soon.
+[Untill then read here](Install.md)
 
 ## Features
 
