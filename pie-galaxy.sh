@@ -8,7 +8,7 @@ tmpdir="${HOME}/wyvern_tmp"
 romdir="${HOME}/RetroPie/roms"
 dosboxdir="${romdir}/pc"
 scummvmdir="${romdir}/scummvm"
-scriptdir="$(basname "$(readlink -f "${0}")")"
+scriptdir="$(dirname "$(readlink -f "${0}")")"
 wyvernbin="${scriptdir}/wyvern"
 innobin="${scriptdir}/innoextract"
 exceptions="${HOME}/pie-galaxy/exceptions.sh"
@@ -41,18 +41,18 @@ _depends() {
 
 _menu() {
 	menuOptions=(
-		"connect" "Operations associated with GOG Connect."
-		"down" "Download specific game."
-		"install" "Install a GOG game from an installer."
-		"ls" "List all games you own."
-		"sync" "Sync a game's saves to a specific location for backup."
-		"about" "About this program."
+		"connect" "Operations associated with GOG Connect"
+		"down" "Download game ${gameName:-selected by ls}"
+		"install" "Install a GOG game from an installer"
+		"ls" "List all games you own"
+		"sync" "Sync a game's saves to a specific location for backup"
+		"about" "About this program"
 	)
 
 	selected=$(dialog \
 		--backtitle "${title}" \
 		--cancel-label "Exit" \
-		--menu "Chose one" \
+		--menu "Choose one" \
 		22 77 16 "${menuOptions[@]}" 3>&2 2>&1 1>&3)
 
 	"_${selected:-exit}"
@@ -246,7 +246,7 @@ _install() {
 _extract() {
 	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 	local folder
-	rm -rf "${tmpdir}/output" #clean the extract path (is this okay to do like this?)
+	rm -rf "${tmpdir:?}/output" #clean the extract path (is this okay to do like this?)
 	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" || (
 		dialog \
 			--backtitle "${title}" \
@@ -255,6 +255,7 @@ _extract() {
 		_menu
 	)
 	folder=$(dirname $(find ${tmpdir}/output -name 'goggame-*.info'))
+	rm -rf "${tmpdir:?}/${gameName}"
 	mv "${folder}" "${tmpdir}/${gameName}"
 }
 
