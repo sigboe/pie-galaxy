@@ -11,7 +11,7 @@ scummvmdir="${romdir}/scummvm"
 scriptdir="$(dirname "$(readlink -f "${0}")")"
 wyvernbin="${scriptdir}/wyvern"
 innobin="${scriptdir}/innoextract"
-exceptions="${HOME}/pie-galaxy/exceptions.sh"
+exceptions="${scriptdir}/exceptions"
 renderhtml="html2text"
 version="0.1"
 
