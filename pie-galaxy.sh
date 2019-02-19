@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
+#
+#
+#
 
 title="Pie Galaxy"
 tmpdir="${HOME}/wyvern_tmp"
 romdir="${HOME}/RetroPie/roms"
 dosboxdir="${romdir}/pc"
 scummvmdir="${romdir}/scummvm"
-wyvernbin="/home/pi/pie-galaxy/wyvern"
-innobin="/home/pi/pie-galaxy/innoextract"
+scriptdir="$(basname "$(readlink -f "${0}")")"
+wyvernbin="${scriptdir}/wyvern"
+innobin="${scriptdir}/innoextract"
 exceptions="${HOME}/pie-galaxy/exceptions.sh"
-#scriptdir=$(pwd)
 renderhtml="html2text"
-#version="0.1" #set a version when the core function work
+version="0.1"
 
 _depends() {
 	#wyvern needs cargo and libssl-dev
@@ -34,7 +37,6 @@ _depends() {
 	if ! [[ -x "$(command -v html2text)" ]]; then
 		renderhtml="sed s:\<br\>:\\n:g"
 	fi
-	#need to also check for dosbox
 }
 
 _menu() {
@@ -220,8 +222,8 @@ _install() {
 			mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
 		elif [[ "$type" == "scummvm" ]]; then
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= {'print $2'} | sed -e "s/\r//g")
-			echo "${shortName}" >"${scummvmdir}/${shortName}.svm"
-			mv -f "${tmpdir}/${gameName}" "${scummvmdir}"
+			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm"
+			echo "${shortName}" > "${scummvmdir}/${gameName}.svm/${shortName}.svm"
 			local extraMessage="To finish the installation and open ScummVM and add game."
 		elif [[ "$type" == "unsupported" ]]; then
 			dialog \
