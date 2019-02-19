@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# didnt have a use for this but keeping it in the repo for future non RetroPie use
 
 dosboxromdir="${HOME}/RetroPie/roms/pc"
 game=$(basename -s .sh "${0}")
