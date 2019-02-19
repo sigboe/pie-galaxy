@@ -44,7 +44,7 @@ Also we need a recent version of innoextract
 
 Lastly we make a shortcut in EmulationStation
 
-    ln -s /opt/piegalaxy/pie-galaxy.sh "/home/pi/RetroPie/roms/ports/Pie Galaxy.sh"
+    echo -e '#!/usr/bin/env bash\n/opt/piegalaxy/pie-galaxy.sh' "/home/pi/RetroPie/roms/ports/Pie Galaxy.sh"
 
 ## Configuring
 
