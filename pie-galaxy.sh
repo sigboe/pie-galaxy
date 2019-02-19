@@ -4,7 +4,7 @@
 #
 
 title="Pie Galaxy"
-tmpdir="${HOME}/wyvern_tmp"
+tmpdir="${HOME}/tmp/piegalaxy"
 romdir="${HOME}/RetroPie/roms"
 dosboxdir="${romdir}/pc"
 scummvmdir="${romdir}/scummvm"
