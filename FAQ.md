@@ -13,3 +13,7 @@ To do this ona a game pad I found it most convenient to press up a few times unt
 ## I cant start the ScummVM game I just installed
 
 Open up the ScummVM GUI and add the game. The shortcut in EmulationStation should work now.
+
+## Gamepad in ScummVM games is erratic
+
+Yes, if you get the lr-scummvm emulator, it you get improvements like better gamepad support, and you don't need to add games in the GUI after you install them.
