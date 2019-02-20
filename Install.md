@@ -2,7 +2,7 @@
 
 These are installation instructions for RetroPie, standard GNU/Linux is not supported yet.
 
-Before this application is comepletely finished, installation will have to be done via SSH. You mostly need to copy and paste commands.
+Before this application is comepletely finished, installation will have to be done via SSH. You only need to copy and paste commands.
 
 ## Connecting to RetroPie via SSH
 
@@ -20,36 +20,27 @@ Just read the official documentation :D
 
 https://www.raspberrypi.org/documentation/remote-access/ssh/windows.md
 
-## Installing dependencies
-
-    sudo apt install jq html2text unar
-
 ## Installing
 
-First we get the files
+Download the packagefile
 
-    cd /opt
-    sudo git clone https://github.com/sigboe/pie-galaxy.git piegalaxy && cd piegalaxy
+    wget -O "${HOME}/scriptmodules/ports/piegalaxy.sh" https://raw.githubusercontent.com/sigboe/pie-galaxy/master/scriptmodule.sh
 
-Then we need wyvern
+Run the package installer
 
-    wget -O wyvern https://demenses.net/wyvern-1.3.0-armv7
-    wget http://constexpr.org/innoextract/files/snapshots/innoextract-1.8-dev-2019-01-13/innoextract-1.8-dev-2019-01-13-linux.tar.xz
+    sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" piegalaxy
 
-Also we need a recent version of innoextract
-
-    tar xf innoextract-1.8-dev-2019-01-13-linux.tar.xz innoextract-1.8-dev-2019-01-13-linux/bin/armv6j-hardfloat/innoextract
-    cp innoextract-1.8-dev-2019-01-13-linux/bin/armv6j-hardfloat/innoextract" .
-    rm -rf innoextract-1.8-dev-2019-01-13-linux innoextract-1.8-dev-2019-01-13-linux.tar.xz
-
-Lastly we make a shortcut in EmulationStation
-
-    echo -e '#!/usr/bin/env bash\n/opt/piegalaxy/pie-galaxy.sh' "/home/pi/RetroPie/roms/ports/Pie Galaxy.sh"
+Follow the configuration steps before you disconnect from SSH
 
 ## Configuring
 
-We need to run a command before it will work.
+Currently we need to logg in by going to an URL in your webbrowser, then copy pasting a token back.
 
-    /opt/piegalaxy/wyvern ls
+    /opt/retropie/ports/piegalaxy/wyvern ls
 
-and follow the instructions to log in.
+Copy the URL to your webbrowser, and log in. After you logg in you will get to a blank site
+The token is in the URL of the webbrowser, copy everything after code= and paste it back into the SSH client.
+
+If you managed to do it correctly, you should see a list of all your games.
+
+Restart EmulationStation, or Reboot, and the program will show up in EmulationStation.
