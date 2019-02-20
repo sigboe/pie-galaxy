@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034 # variables are sourced from here, no need to error
+# shellcheck disable=SC2154 # variables are inherrited when sourced, o need to error
 # Useful variables:
 # ${gameName}           Name of the game as it appears on GOG.com
 # ${tmpdir}/${gameName} Where the game files got extracted, before install
