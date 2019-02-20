@@ -13,6 +13,7 @@ wyvernbin="${scriptdir}/wyvern"
 innobin="${scriptdir}/innoextract"
 exceptions="${scriptdir}/exceptions"
 renderhtml="html2text"
+exceptionList="" #empty var, this will be overrwritten at runime
 version="0.1"
 
 _depends() {
@@ -142,7 +143,7 @@ _checklogin() {
 	else
 		dialog \
 			--backtitle "${title}" \
-			--msgbox "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run \`wyvern ls\` and follow the instructions to login." \
+			--msgbox "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." \
 			22 77
 		_exit 1
 	fi
@@ -186,6 +187,7 @@ _install() {
 			--yesno "${setupInfo}" \
 			22 77 || _menu
 
+		# shellcheck source=/dev/null
 		source "${exceptions}"
 		match=$(echo "${exceptionList[@]:0}" | grep -o "${gameID}")
 		if [[ -n "${match}" ]]; then
@@ -201,7 +203,7 @@ _install() {
 		if [[ "$type" == "dosbox" ]]; then
 			mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
 		elif [[ "$type" == "scummvm" ]]; then
-			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= {'print $2'} | sed -e "s/\r//g")
+			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm"
 			echo "${shortName}" > "${scummvmdir}/${gameName}.svm/${shortName}.svm"
 			local extraMessage="To finish the installation and open ScummVM and add game."
@@ -234,7 +236,7 @@ _extract() {
 			22 77
 		_menu
 	)
-	folder=$(dirname $(find ${tmpdir}/output -name 'goggame-*.info'))
+	folder=$(dirname "$(find "${tmpdir}"/output -name 'goggame-*.info')")
 	rm -rf "${tmpdir:?}/${gameName}"
 	mv "${folder}" "${tmpdir}/${gameName}"
 }
@@ -265,6 +267,7 @@ _getType() {
 _joy2key() {
 	if [[ -f "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh" ]]; then
 		local scriptdir="/home/pi/RetroPie-Setup"
+		# shellcheck source=/dev/null
 		source "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 		joy2keyStart
 	fi
