@@ -18,19 +18,19 @@ version="0.1"
 
 _depends() {
 	if ! [[ -x "${wyvernbin}" ]]; then
-		echo "Wyvern not installed."
+		_error "Wyvern not installed."
 		exit 1
 	fi
 	if ! [[ -x "${innobin}" ]]; then
-		echo "innoextract not installed."
+		_error "innoextract not installed."
 		exit 1
 	fi
 	if ! [[ -x "$(command -v jq)" ]]; then
-		echo "jq not installed."
+		_error "jq not installed."
 		exit 1
 	fi
 	if ! [[ -x "$(command -v dialog)" ]]; then
-		echo "dialog not installed."
+		_error "dialog not installed."
 		exit 1
 	fi
 	if ! [[ -x "$(command -v html2text)" ]]; then
@@ -201,17 +201,14 @@ _Install() {
 		type=$(_getType "${gameName}")
 
 		if [[ "$type" == "dosbox" ]]; then
-			mv -f "${tmpdir}/${gameName}" "${dosboxdir}"
+			mv -f "${tmpdir}/${gameName}" "${dosboxdir}" || _error "Uname to copy game to ${dosboxdir}\n\nThis is likely due to ScummVM not being installed."
 		elif [[ "$type" == "scummvm" ]]; then
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
-			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm"
+			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
 			echo "${shortName}" > "${scummvmdir}/${gameName}.svm/${shortName}.svm"
 			local extraMessage="To finish the installation and open ScummVM and add game."
 		elif [[ "$type" == "unsupported" ]]; then
-			dialog \
-				--backtitle "${title}" \
-				--msgbox "${fileSelected} apperantly is unsupported." \
-				22 77
+			_error "${fileSelected} apperantly is unsupported."
 			_menu
 		fi
 
@@ -262,6 +259,14 @@ _getType() {
 	fi
 
 	echo "${type:-unsupported}"
+}
+
+_error() {
+	dialog \
+		--backtitle "${title}" \
+		--msgbox "Error:\n\n${1}" \
+		22 77
+	_menu
 }
 
 _joy2key() {

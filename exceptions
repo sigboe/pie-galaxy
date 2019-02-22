@@ -8,6 +8,7 @@
 # ${romdir}             Folder that has rom folders for different emulators
 # ${dosboxdir}          ${romdir}/pc
 # ${scummvmdir}         ${romdir}/scummvm
+# You can write error messages for commands that fail by ending the command like so || _error "What failed and why"
 
 
 exceptionList=(
