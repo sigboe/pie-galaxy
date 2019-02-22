@@ -29,5 +29,5 @@ function install_bin_piegalaxy() {
 }
 
 function configure_piegalaxy() {
-	addPort "$md_id" "piegalaxy" "Pie Galaxy" "$md_inst/pie-galaxy.sh >\$(tty)"
+	addPort "$md_id" "piegalaxy" "Pie Galaxy" "$md_inst/pie-galaxy.sh"
 }

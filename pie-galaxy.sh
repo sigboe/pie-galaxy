@@ -97,7 +97,7 @@ _description() {
 		--title "${gameName}" \
 		--ok-label "Select" \
 		--msgbox "${gameDescription}" \
-		22 77
+		22 77 >"$(tty)" <"$(tty)"
 
 }
 
@@ -122,7 +122,7 @@ _Download() {
 		dialog \
 			--backtitle "${title}" \
 			--msgbox "No game selected, please use ls to list all games you own." \
-			22 77
+			22 77 >"$(tty)" <"$(tty)"
 		_menu
 	else
 		mkdir -p "${tmpdir}"
@@ -131,7 +131,7 @@ _Download() {
 		dialog \
 			--backtitle "${title}" \
 			--msgbox "${gameName} finished downloading." \
-			22 77
+			22 77 >"$(tty)" <"$(tty)"
 	fi
 
 	_menu
@@ -144,7 +144,7 @@ _checklogin() {
 		dialog \
 			--backtitle "${title}" \
 			--msgbox "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." \
-			22 77
+			22 77 >"$(tty)" <"$(tty)"
 		_exit 1
 	fi
 }
@@ -153,7 +153,7 @@ _About() {
 	dialog \
 		--backtitle "${title}" \
 		--msgbox "Version: ${version}\n\nA GOG client for RetroPie and other GNU/Linux distributions. It uses Wyvern to download and Innoextract to extract games. Pie Galaxy also provides a user interface navigatable by game controllers and will install games in such a way that it will use native runtimes. It also uses Wyvern to let you claim games available from GOG Connect." \
-		22 77
+		22 77 >"$(tty)" <"$(tty)"
 	_menu
 }
 
@@ -161,7 +161,7 @@ _Sync() {
 	dialog \
 		--backtitle "${title}" \
 		--msgbox "This feature is not written yet for RetroPie." \
-		22 77
+		22 77 >"$(tty)" <"$(tty)"
 	#need to write a sync, maybe open a menu to check for games with support or something.
 	_menu
 }
@@ -174,7 +174,7 @@ _Install() {
 		dialog \
 			--backtitle "${title}" \
 			--msgbox "No file was selected." \
-			22 77
+			22 77 >"$(tty)" <"$(tty)"
 	else
 
 		setupInfo=$("${innobin}" --gog-game-id "${fileSelected}")
@@ -185,7 +185,7 @@ _Install() {
 			--backtitle "${title}" \
 			--title "${gameName}" \
 			--yesno "${setupInfo}" \
-			22 77 || _menu
+			22 77 >"$(tty)" <"$(tty)" || _menu
 
 		# shellcheck source=/dev/null
 		source "${exceptions}"
@@ -215,7 +215,7 @@ _Install() {
 		dialog \
 			--backtitle "${title}" \
 			--msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}\n\n${extraMessage}" \
-			22 77
+			22 77 >"$(tty)" <"$(tty)"
 	fi
 
 	_menu
@@ -226,11 +226,11 @@ _extract() {
 	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 	local folder
 	rm -rf "${tmpdir:?}/output" #clean the extract path (is this okay to do like this?)
-	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" || (
+	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)" || (
 		dialog \
 			--backtitle "${title}" \
 			--msgbox "ERROR: Unable to read setup file" \
-			22 77
+			22 77 >"$(tty)" <"$(tty)"
 		_menu
 	)
 	folder=$(dirname "$(find "${tmpdir}"/output -name 'goggame-*.info')")
@@ -254,7 +254,7 @@ _getType() {
 		dialog \
 			--backtitle "${title}" \
 			--msgbox "Didn't find what game it was.\nNot installing." \
-			22 77
+			22 77  >"$(tty)" <"$(tty)"
 		_menu
 	fi
 
@@ -265,7 +265,7 @@ _error() {
 	dialog \
 		--backtitle "${title}" \
 		--msgbox "Error:\n\n${1}" \
-		22 77
+		22 77  >"$(tty)" <"$(tty)"
 	_menu
 }
 
