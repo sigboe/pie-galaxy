@@ -38,9 +38,7 @@ cd "$path" && zip -mj "savegames_${wadfile%.*}.zip" prbmsav?.dsg
 _EOF_
     chmod +x "${romdir}/ports/Ultimate Doom.sh"
     if dialog --backtitle "${title}" --yesno "${gameName} has been installed to ${romdir}/ports/doom.\nSelect yes to build libretro PrBoom, to use as the engine.\nSelect No to skip build." 22 77; then
-        sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom sources
-        sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom build
-        sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom install
+        sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom 
     fi
     dialog --backtitle "${title}" --msgbox "${gameName} is installed to work with PrBoom, with seperated savgame.\n\nMake sure to enable lr-prboom as your DOOM engine, in the runcommand." 22 77
 }
