@@ -201,7 +201,7 @@ _Install() {
 		type=$(_getType "${gameName}")
 
 		if [[ "$type" == "dosbox" ]]; then
-			mv -f "${tmpdir}/${gameName}" "${dosboxdir}" || _error "Uname to copy game to ${dosboxdir}\n\nThis is likely due to ScummVM not being installed."
+			mv -f "${tmpdir}/${gameName}" "${dosboxdir}/" || _error "Uname to copy game to ${dosboxdir}\n\nThis is likely due to ScummVM not being installed."
 		elif [[ "$type" == "scummvm" ]]; then
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
