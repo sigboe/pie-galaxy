@@ -52,7 +52,7 @@ _menu() {
 		--backtitle "${title}" \
 		--cancel-label "Exit" \
 		--menu "Choose one" \
-		22 77 16 "${menuOptions[@]}" 3>&1 1>&2 2>&3 >$(tty) <$(tty))
+		22 77 16 "${menuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
 	"_${selected:-exit}"
 }
@@ -64,7 +64,7 @@ _Library() {
 	selectedGame=$(dialog \
 		--backtitle "${title}" \
 		--ok-label "Details" \
-		--menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >$(tty) <$(tty))
+		--menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
 	if [[ -n "${selectedGame}" ]]; then
 		_description "${selectedGame}"
@@ -102,13 +102,13 @@ _description() {
 }
 
 _Connect() {
-	availableGames=$("${wyvernbin}" connect ls 3>&1 1>&2 2>&3 >$(tty) <$(tty))
+	availableGames=$("${wyvernbin}" connect ls 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
 	local response
 	response=$(dialog \
 		--backtitle "${title}" \
 		--yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" \
-		22 77 3>&1 1>&2 2>&3 >$(tty) <$(tty))
+		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
 	if [[ $response ]]; then
 		"${wyvernbin}" connect claim
@@ -127,7 +127,7 @@ _Download() {
 	else
 		mkdir -p "${tmpdir}"
 		cd "${tmpdir}/" || _exit 1
-		"${wyvernbin}" down --id "${selectedGame}" --force-windows 3>&1 1>&2 2>&3 >$(tty) <$(tty)
+		"${wyvernbin}" down --id "${selectedGame}" --force-windows 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
 		dialog \
 			--backtitle "${title}" \
 			--msgbox "${gameName} finished downloading." \
@@ -168,7 +168,7 @@ _Sync() {
 
 _Install() {
 	local fileSelected setupInfo gameName gameID response match type shortName
-	fileSelected=$(dialog --backtitle "${title}" --fselect "${tmpdir}/" 22 77 3>&1 1>&2 2>&3 >$(tty) <$(tty))
+	fileSelected=$(dialog --backtitle "${title}" --fselect "${tmpdir}/" 22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
 	if ! [[ -f "${fileSelected}" ]]; then
 		dialog \
@@ -205,7 +205,7 @@ _Install() {
 		elif [[ "$type" == "scummvm" ]]; then
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
-			echo "${shortName}" > "${scummvmdir}/${gameName}.svm/${shortName}.svm"
+			echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
 			local extraMessage="To finish the installation and open ScummVM and add game."
 		elif [[ "$type" == "unsupported" ]]; then
 			_error "${fileSelected} apperantly is unsupported."
