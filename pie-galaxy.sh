@@ -141,10 +141,7 @@ _checklogin() {
 	if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
 		wyvernls=$("${wyvernbin}" ls --json)
 	else
-		dialog \
-			--backtitle "${title}" \
-			--msgbox "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." \
-			22 77 >"$(tty)" <"$(tty)"
+		_error "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login."
 		_exit 1
 	fi
 }
@@ -158,11 +155,7 @@ _About() {
 }
 
 _Sync() {
-	dialog \
-		--backtitle "${title}" \
-		--msgbox "This feature is not written yet for RetroPie." \
-		22 77 >"$(tty)" <"$(tty)"
-	#need to write a sync, maybe open a menu to check for games with support or something.
+	_error "This feature is not written yet for RetroPie."
 	_menu
 }
 
@@ -226,13 +219,7 @@ _extract() {
 	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 	local folder
 	rm -rf "${tmpdir:?}/output" #clean the extract path (is this okay to do like this?)
-	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)" || (
-		dialog \
-			--backtitle "${title}" \
-			--msgbox "ERROR: Unable to read setup file" \
-			22 77 >"$(tty)" <"$(tty)"
-		_menu
-	)
+	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)" || (_error "Unable to read setup file"; _menu)
 	folder=$(dirname "$(find "${tmpdir}"/output -name 'goggame-*.info')")
 	rm -rf "${tmpdir:?}/${gameName}"
 	mv "${folder}" "${tmpdir}/${gameName}"
@@ -251,10 +238,7 @@ _getType() {
 		# Surly this wont work, but its a placeholder
 		type="neogeo"
 	else
-		dialog \
-			--backtitle "${title}" \
-			--msgbox "Didn't find what game it was.\nNot installing." \
-			22 77  >"$(tty)" <"$(tty)"
+		_error "Didn't find what game it was.\nNot installing."
 		_menu
 	fi
 
