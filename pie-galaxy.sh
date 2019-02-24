@@ -161,7 +161,7 @@ _Sync() {
 }
 
 _Install() {
-	local fileSelected setupInfo gameName gameID response match type shortName
+	local fileSelected setupInfo gameName gameID response match type shortName extraMessage
 	fileSelected=$(dialog --backtitle "${title}" --fselect "${tmpdir}/" 22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
 	if ! [[ -f "${fileSelected}" ]]; then
@@ -200,7 +200,7 @@ _Install() {
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
 			echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
-			local extraMessage="To finish the installation and open ScummVM and add game."
+			extraMessage="To finish the installation and open ScummVM and add game."
 		elif [[ "$type" == "unsupported" ]]; then
 			_error "${fileSelected} apperantly is unsupported."
 			_menu
@@ -212,6 +212,7 @@ _Install() {
 			22 77 >"$(tty)" <"$(tty)"
 	fi
 
+	unset extraMessage
 	_menu
 
 }
