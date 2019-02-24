@@ -17,6 +17,11 @@ exceptionList="" #empty var, this will be overrwritten at runime
 version="0.1"
 
 _depends() {
+	if ! [[ -x "$(command -v dialog)" ]]; then
+		echo "dialog not installed." 3>&1 1>&2 2>&3 >"$(tty)"
+		sleep 10
+		exit 1
+	fi
 	if ! [[ -x "${wyvernbin}" ]]; then
 		_error "Wyvern not installed."
 		exit 1
@@ -27,10 +32,6 @@ _depends() {
 	fi
 	if ! [[ -x "$(command -v jq)" ]]; then
 		_error "jq not installed."
-		exit 1
-	fi
-	if ! [[ -x "$(command -v dialog)" ]]; then
-		_error "dialog not installed."
 		exit 1
 	fi
 	if ! [[ -x "$(command -v html2text)" ]]; then
