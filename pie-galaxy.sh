@@ -140,7 +140,7 @@ _Download() {
 
 _checklogin() {
 	if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
-		wyvernls=$("${wyvernbin}" ls --json)
+		wyvernls=$(timeout 30 "${wyvernbin}" ls --json) || _error "It took longer than 30 seconds. You may need to log in again.\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login."
 	else
 		_error "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login."
 		_exit 1
