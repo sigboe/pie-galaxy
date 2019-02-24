@@ -10,17 +10,17 @@
 # ${scummvmdir}         ${romdir}/scummvm
 # You can write error messages for commands that fail by ending the command like so || _error "What failed and why"
 
-
 exceptionList=(
-1435827232 #Ultimate DOOM, The
-1207658753 #Teenagent
+    1435827232 #Ultimate DOOM, The
+    1207658753 #Teenagent
+    1885026907 #Escape from Monkey Island
 )
 
 1435827232_exception() { #Ultimate DOOM, The
     sudo apt install zip
     mkdir -p "${romdir}/ports/doom"
     cp "${tmpdir}/${gameName}/DOOM.WAD" "${romdir}/ports/doom/"
-    cat <<'_EOF_' >> "${romdir}/ports/Ultimate Doom.sh"
+    cat <<'_EOF_' >>"${romdir}/ports/Ultimate Doom.sh"
 #!/usr/bin/env bash
 # This file is borrowed from https://raw.githubusercontent.com/crcerror/launch-doom-packs-RP/6479af76bf7909711245763a1c7e707f852d56b2/DOOM%20-%201.sh
 path="/home/pi/RetroPie/roms/ports/doom"
@@ -39,14 +39,14 @@ cd "$path" && zip -mj "savegames_${wadfile%.*}.zip" prbmsav?.dsg
 _EOF_
     chmod +x "${romdir}/ports/Ultimate Doom.sh"
     if dialog --backtitle "${title}" --yesno "${gameName} has been installed to ${romdir}/ports/doom.\nSelect yes to build libretro PrBoom, to use as the engine.\nSelect No to skip build." 22 77; then
-        sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom 
+        sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom
     fi
     dialog --backtitle "${title}" --msgbox "${gameName} is installed to work with PrBoom, with seperated savgame.\n\nMake sure to enable lr-prboom as your DOOM engine, in the runcommand." 22 77
 }
 
 1207658753_exception() { #Teenagent
     mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm"
-    echo "teenagent" > "${scummvmdir}/${gameName}.svm/teenagent.svm"
+    echo "teenagent" >"${scummvmdir}/${gameName}.svm/teenagent.svm"
     dialog \
         --backtitle "${title}" \
         --msgbox "${gameName} Has been installed to ${scummvmdir}\n\nYou need to open up ScummVM and add the game manually." \
