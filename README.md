@@ -23,6 +23,10 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
     * Teenagent will install as a ScummVM game
 * ScummVM games
     * Every game I have tested thus far has worked
+* ResidualVM games
+    * Escape from Monkey Island (Works!)
+    * Myst 3 (Not added support yet)
+    * Grim Fandango (Only remastered is on GOG, can't use it.)
 * Native games
     * Ultimate DOOM, The
 
@@ -42,7 +46,6 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 
 ### Research
 
-* RecidualVM games
 * Native game: Jedi Outcast/Academy
 * Native game: Heroes 3 (HOMM3)
 * Basic friend support
