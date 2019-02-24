@@ -23,16 +23,13 @@ _depends() {
 		exit 1
 	fi
 	if ! [[ -x "${wyvernbin}" ]]; then
-		_error "Wyvern not installed."
-		exit 1
+		_error "Wyvern not installed." 1
 	fi
 	if ! [[ -x "${innobin}" ]]; then
-		_error "innoextract not installed."
-		exit 1
+		_error "innoextract not installed." 1
 	fi
 	if ! [[ -x "$(command -v jq)" ]]; then
-		_error "jq not installed."
-		exit 1
+		_error "jq not installed." 1
 	fi
 	if ! [[ -x "$(command -v html2text)" ]]; then
 		renderhtml="sed s:\<br\>:\\n:g"
@@ -252,6 +249,7 @@ _error() {
 		--backtitle "${title}" \
 		--msgbox "Error:\n\n${1}" \
 		22 77  >"$(tty)" <"$(tty)"
+	[[ "${2}" =~ ^[0-9]+$ ]] && exit "${2}"
 	_menu
 }
 
