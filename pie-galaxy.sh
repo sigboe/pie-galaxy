@@ -102,14 +102,9 @@ _description() {
 _Connect() {
 	availableGames=$("${wyvernbin}" connect ls 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
-	local response
-	response=$(dialog \
-		--backtitle "${title}" \
-		--yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?" \
-		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
-
-	if [[ $response ]]; then
+	if _yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?"; then
 		"${wyvernbin}" connect claim
+		_msgbox "Games claimed"
 	fi
 
 	_menu
@@ -203,10 +198,7 @@ _Install() {
 			_menu
 		fi
 
-		dialog \
-			--backtitle "${title}" \
-			--msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}\n\n${extraMessage}" \
-			22 77 >"$(tty)" <"$(tty)"
+		_msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}\n\n${extraMessage}"
 	fi
 
 	unset extraMessage
@@ -242,6 +234,21 @@ _getType() {
 	fi
 
 	echo "${type:-unsupported}"
+}
+
+_msgbox() {
+	dialog \
+		--backtitle "${title}" \
+		--msgbox "${1}" \
+		22 77  >"$(tty)" <"$(tty)"
+}
+
+_yesno() {
+	dialog \
+		--backtitle "${title}" \
+		--yesno "${1}" \
+		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
+	return ${?}
 }
 
 _error() {
