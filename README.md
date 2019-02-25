@@ -24,9 +24,10 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 * ScummVM games
   * Every game I have tested thus far has worked
 * ResidualVM games
-  * Escape from Monkey Island (Works!)
-  * Myst 3 (Not added support yet)
-  * Grim Fandango (Only remastered is on GOG, can't use it.)
+  * Escape from Monkey Island (**Works!**)
+  * Myst 3 (Not added support **yet**)
+  * The Longest Journey (Not supported **yet**)
+  * Grim Fandango (Not for sale on GOG, Remaster is not supported)
 * Native games
   * Ultimate DOOM, The
 
@@ -48,6 +49,7 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 
 * Native game: Jedi Outcast/Academy
 * Native game: Heroes 3 (HOMM3)
+* Native game: TES3: Morrowind
 * Basic friend support
   * List friends online status
   * Maybe more
