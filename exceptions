@@ -18,8 +18,8 @@ exceptionList=(
 
 1435827232_exception() { #Ultimate DOOM, The
     sudo apt install zip
-    mkdir -p "${romdir}/ports/doom"
-    cp "${tmpdir}/${gameName}/DOOM.WAD" "${romdir}/ports/doom/"
+    mkdir -p "${romdir}/ports/doom" || { _error "Could not create folder ${romdir}/ports/doom"; return; }
+    cp "${tmpdir}/${gameName}/DOOM.WAD" "${romdir}/ports/doom/" || { _error "Could not copy DOOM.WAD to install directory"; return; }
     cat <<'_EOF_' >>"${romdir}/ports/Ultimate Doom.sh"
 #!/usr/bin/env bash
 # This file is borrowed from https://raw.githubusercontent.com/crcerror/launch-doom-packs-RP/6479af76bf7909711245763a1c7e707f852d56b2/DOOM%20-%201.sh
@@ -37,32 +37,29 @@ fi
 "/opt/retropie/supplementary/runcommand/runcommand.sh" 0 _PORT_ "doom" "${path}/$wadfile"
 cd "$path" && zip -mj "savegames_${wadfile%.*}.zip" prbmsav?.dsg
 _EOF_
-    chmod +x "${romdir}/ports/Ultimate Doom.sh"
-    if dialog --backtitle "${title}" --yesno "${gameName} has been installed to ${romdir}/ports/doom.\nSelect yes to build libretro PrBoom, to use as the engine.\nSelect No to skip build." 22 77; then
-        sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom
+    chmod +x "${romdir}/ports/Ultimate Doom.sh" || { _error "Could not create install script"; return; }
+    if _yesno "${gameName} has been installed to ${romdir}/ports/doom.\nSelect yes to build libretro PrBoom, to use as the engine.\nSelect No to skip build."; then
+        sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom || { _error "Could not install lr-prboom"; return; }
     fi
-    dialog --backtitle "${title}" --msgbox "${gameName} is installed to work with PrBoom, with seperated savgame.\n\nMake sure to enable lr-prboom as your DOOM engine, in the runcommand." 22 77
+    _msgbox "${gameName} is installed to work with PrBoom, with seperated savgame.\n\nMake sure to enable lr-prboom as your DOOM engine, in the runcommand."
 }
 
 1207658753_exception() { #Teenagent
-    mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm"
-    echo "teenagent" >"${scummvmdir}/${gameName}.svm/teenagent.svm"
-    dialog \
-        --backtitle "${title}" \
-        --msgbox "${gameName} Has been installed to ${scummvmdir}\n\nYou need to open up ScummVM and add the game manually." \
-        22 77
+    mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || { _error "Could not copy games to ${scummvmdir}/${gameName}.svm"; return; }
+    echo "teenagent" >"${scummvmdir}/${gameName}.svm/teenagent.svm" || { _error "Could not create shortcut"; return; }
+    _msgbox "${gameName} Has been installed to ${scummvmdir}\n\nYou need to open up ScummVM and add the game manually."
 }
 
 1885026907_exception() { #Escape from Monkey Island
-    mv -f "${tmpdir}/${gameName}" "${romdir}/residualvm/${gameName}" || _error "Could not copy games to ${romdir}/residualvm/"
+    mv -f "${tmpdir}/${gameName}" "${romdir}/residualvm/${gameName}" || { _error "Could not copy games to ${romdir}/residualvm/"; return; }
     (
-        cd "${romdir}/residualvm/${gameName}" || _error "Could not access ${romdir}/residualvm/${gameName}, install aborted."
+        cd "${romdir}/residualvm/${gameName}" || { _error "Could not access ${romdir}/residualvm/${gameName}"; return; }
         curl -o "MonkeyUpdate.exe" -O "https://demos.residualvm.org/patches/MonkeyUpdate.exe"
     )
     (
-        cd "${romdir}/residualvm/${gameName}/Textures" || _error "Could not access ${gameName}/Textures, install aborted."
-        mv "FullMonkeyMap.imt" "FullMonkeyMap1.imt" || _error "Could not manipulate texture data, install aborted."
-        cp "FullMonkeyMap1.imt" "FullMonkeyMap2.imt" || _error "Could not manipulate texture data, install aborted."
+        cd "${romdir}/residualvm/${gameName}/Textures" || { _error "Could not access ${gameName}/Textures"; return; }
+        mv "FullMonkeyMap.imt" "FullMonkeyMap1.imt" || { _error "Could not manipulate texture data"; return; }
+        cp "FullMonkeyMap1.imt" "FullMonkeyMap2.imt" || { _error "Could not manipulate texture data"; return; }
     )
     _msgbox "${gameName} Has been installed to ${romdir}/"
 }
