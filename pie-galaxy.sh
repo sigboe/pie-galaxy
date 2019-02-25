@@ -110,7 +110,7 @@ _Download() {
 	else
 		mkdir -p "${tmpdir}"
 		cd "${tmpdir}/" || _exit 1
-		"${wyvernbin}" down --id "${selectedGame}" --force-windows 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
+		"${wyvernbin}" down --id "${selectedGame}" --force-windows 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)" || { _error "download failed"; return; }
 		_msgbox "${gameName} finished downloading."
 	fi
 
