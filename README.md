@@ -18,17 +18,17 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 
 ## Compatiblity
 
-* DOSBox games 
-    * Every game I have tested thus far has worked
-    * Teenagent will install as a ScummVM game
+* DOSBox games
+  * Every game I have tested thus far has worked
+  * Teenagent will install as a ScummVM game
 * ScummVM games
-    * Every game I have tested thus far has worked
+  * Every game I have tested thus far has worked
 * ResidualVM games
-    * Escape from Monkey Island (Works!)
-    * Myst 3 (Not added support yet)
-    * Grim Fandango (Only remastered is on GOG, can't use it.)
+  * Escape from Monkey Island (Works!)
+  * Myst 3 (Not added support yet)
+  * Grim Fandango (Only remastered is on GOG, can't use it.)
 * Native games
-    * Ultimate DOOM, The
+  * Ultimate DOOM, The
 
 ## Todo
 
@@ -49,5 +49,5 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 * Native game: Jedi Outcast/Academy
 * Native game: Heroes 3 (HOMM3)
 * Basic friend support
-    * List friends online status
-    * Maybe more
+  * List friends online status
+  * Maybe more
