@@ -2,6 +2,7 @@
 # This application was made by https://github.com/sigboe
 # The License is GNU General Public License v3.0
 # https://github.com/sigboe/pie-galaxy/blob/master/LICENSE
+# shellcheck disable=SC2094 # Dirty hack avoid runcommand to steal stdout
 
 title="Pie Galaxy"
 tmpdir="${HOME}/tmp/piegalaxy"
@@ -20,7 +21,7 @@ _depends() {
 	if ! [[ -x "$(command -v dialog)" ]]; then
 		echo "dialog not installed." 3>&1 1>&2 2>&3 >"$(tty)"
 		sleep 10
-		exit 1
+		_exit 1
 	fi
 	if ! [[ -x "${wyvernbin}" ]]; then
 		_error "Wyvern not installed." 1
@@ -36,7 +37,7 @@ _depends() {
 	fi
 }
 
-_menu() {
+main() {
 	menuOptions=(
 		"Connect" "Operations associated with GOG Connect"
 		"Download" "Download game ${gameName:-selected from the Library}"
@@ -52,7 +53,6 @@ _menu() {
 		--menu "Choose one" \
 		22 77 16 "${menuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
-	"_${selected:-exit}"
 }
 
 _Library() {
@@ -62,13 +62,12 @@ _Library() {
 	selectedGame=$(dialog \
 		--backtitle "${title}" \
 		--ok-label "Details" \
-		--menu "Chose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
+		--menu "Choose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
 	if [[ -n "${selectedGame}" ]]; then
 		_description "${selectedGame}"
 	fi
 
-	_menu
 }
 
 _description() {
@@ -90,12 +89,7 @@ _description() {
 
 	fi
 
-	dialog \
-		--backtitle "${title}" \
-		--title "${gameName}" \
-		--ok-label "Select" \
-		--msgbox "${gameDescription}" \
-		22 77 >"$(tty)" <"$(tty)"
+	_msgbox "${gameDescription}" --ok-label "Select"
 
 }
 
@@ -107,71 +101,61 @@ _Connect() {
 		_msgbox "Games claimed"
 	fi
 
-	_menu
 }
 
 _Download() {
 	if [[ -z ${selectedGame} ]]; then
-		dialog \
-			--backtitle "${title}" \
-			--msgbox "No game selected, please use ls to list all games you own." \
-			22 77 >"$(tty)" <"$(tty)"
-		_menu
+		_msgbox "No game selected, please use ls to list all games you own."
+		return
 	else
 		mkdir -p "${tmpdir}"
 		cd "${tmpdir}/" || _exit 1
 		"${wyvernbin}" down --id "${selectedGame}" --force-windows 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
-		dialog \
-			--backtitle "${title}" \
-			--msgbox "${gameName} finished downloading." \
-			22 77 >"$(tty)" <"$(tty)"
+		_msgbox "${gameName} finished downloading."
 	fi
 
-	_menu
 }
 
 _checklogin() {
 	if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
-		wyvernls=$(timeout 30 "${wyvernbin}" ls --json) || _error "It took longer than 30 seconds. You may need to log in again.\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login."
+		wyvernls=$(timeout 30 "${wyvernbin}" ls --json) || _error "It took longer than 30 seconds. You may need to log in again.\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
 	else
-		_error "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login."
-		_exit 1
+		_error "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
 	fi
 }
 
 _About() {
-	dialog \
-		--backtitle "${title}" \
-		--msgbox "Version: ${version}\n\nA GOG client for RetroPie and other GNU/Linux distributions. It uses Wyvern to download and Innoextract to extract games. Pie Galaxy also provides a user interface navigatable by game controllers and will install games in such a way that it will use native runtimes. It also uses Wyvern to let you claim games available from GOG Connect." \
-		22 77 >"$(tty)" <"$(tty)"
-	_menu
+	_msgbox "Version: ${version}\n\nA GOG client for RetroPie and other GNU/Linux distributions. It uses Wyvern to download and Innoextract to extract games. Pie Galaxy also provides a user interface navigatable by game controllers and will install games in such a way that it will use native runtimes. It also uses Wyvern to let you claim games available from GOG Connect."
 }
 
 _Sync() {
-	_error "This feature is not written yet for RetroPie."
-	_menu
+	_msgbox "This feature is not written yet for RetroPie."
 }
 
 _Install() {
-	local fileSelected setupInfo gameName gameID response match type shortName extraMessage
+	local fileSelected setupInfo gameName gameID match type shortName extraMessage
 	fileSelected=$(dialog --backtitle "${title}" --fselect "${tmpdir}/" 22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
 
 	if ! [[ -f "${fileSelected}" ]]; then
-		dialog \
-			--backtitle "${title}" \
-			--msgbox "No file was selected." \
-			22 77 >"$(tty)" <"$(tty)"
+		_msgbox "No file was selected."
 	else
 
 		setupInfo=$("${innobin}" --gog-game-id "${fileSelected}")
 		gameName=$(echo "${setupInfo}" |& awk -F'"' '{print $2}')
 		gameID=$("${innobin}" -s --gog-game-id "${fileSelected}")
 
-		dialog \
-			--backtitle "${title}" \
-			--title "${gameName}" \
-			--yesno "${setupInfo}" \
-			22 77 >"$(tty)" <"$(tty)" || _menu
+		_yesno "${setupInfo#"Inspecting "}" --title "${gameName}" --extra-button --extra-label "Delete" --ok-label "Install"
+
+		case $? in
+			1|255)
+				# cancel or esc
+				return;;
+			3)
+				#delete
+				rm "${fileSelected}" || { _error "unable to delete file"; return; }
+				_msgbox "${fileSelected} deleted."
+				return;;
+		esac
 
 		# shellcheck source=/dev/null
 		source "${exceptions}"
@@ -179,7 +163,7 @@ _Install() {
 		if [[ -n "${match}" ]]; then
 			_extract
 			"${gameID}_exception"
-			_menu
+			return
 		else
 			_extract
 		fi
@@ -187,22 +171,19 @@ _Install() {
 		type=$(_getType "${gameName}")
 
 		if [[ "$type" == "dosbox" ]]; then
-			mv -f "${tmpdir}/${gameName}" "${dosboxdir}/" || _error "Uname to copy game to ${dosboxdir}\n\nThis is likely due to ScummVM not being installed."
+			mv -f "${tmpdir}/${gameName}" "${dosboxdir}/" || { _error "Uname to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."; return; }
 		elif [[ "$type" == "scummvm" ]]; then
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
-			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
+			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || { _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."; return; }
 			echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
 			extraMessage="To finish the installation and open ScummVM and add game."
 		elif [[ "$type" == "unsupported" ]]; then
 			_error "${fileSelected} apperantly is unsupported."
-			_menu
+			return
 		fi
 
 		_msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}\n\n${extraMessage}"
 	fi
-
-	unset extraMessage
-	_menu
 
 }
 
@@ -210,7 +191,7 @@ _extract() {
 	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 	local folder
 	rm -rf "${tmpdir:?}/output" #clean the extract path (is this okay to do like this?)
-	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)" || (_error "Unable to read setup file"; _menu)
+	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)" || { _error "Unable to read setup file"; return; }
 	folder=$(dirname "$(find "${tmpdir}"/output -name 'goggame-*.info')")
 	rm -rf "${tmpdir:?}/${gameName}"
 	mv "${folder}" "${tmpdir}/${gameName}"
@@ -230,23 +211,31 @@ _getType() {
 		type="neogeo"
 	else
 		_error "Didn't find what game it was.\nNot installing."
-		_menu
+		return
 	fi
 
 	echo "${type:-unsupported}"
 }
 
 _msgbox() {
+	local msg="${1}"
+	shift
+	local opts=("${@}")
 	dialog \
 		--backtitle "${title}" \
-		--msgbox "${1}" \
-		22 77  >"$(tty)" <"$(tty)"
+		"${opts[@]}" \
+		--msgbox "${msg}" \
+		22 77 >"$(tty)" <"$(tty)"
 }
 
 _yesno() {
+	local msg="${1}"
+	shift
+	local opts=("${@}")
 	dialog \
 		--backtitle "${title}" \
-		--yesno "${1}" \
+		"${opts[@]}" \
+		--yesno "${msg}" \
 		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
 	return ${?}
 }
@@ -254,10 +243,10 @@ _yesno() {
 _error() {
 	dialog \
 		--backtitle "${title}" \
-		--msgbox "Error:\n\n${1}" \
-		22 77  >"$(tty)" <"$(tty)"
-	[[ "${2}" =~ ^[0-9]+$ ]] && exit "${2}"
-	_menu
+		--title "ERROR:" \
+		--msgbox "${1}" \
+		22 77 >"$(tty)" <"$(tty)"
+	[[ "${2}" =~ ^[0-9]+$ ]] && _exit "${2}"
 }
 
 _joy2key() {
@@ -279,5 +268,7 @@ _exit() {
 _joy2key
 _depends
 _checklogin
-_menu
+
+while true; do main; "_${selected:-exit}"; done
+
 _exit
