@@ -134,7 +134,7 @@ _Sync() {
 
 _Install() {
 	local fileSelected setupInfo gameName gameID match type shortName extraMessage
-	fileSelected=$(dialog --backtitle "${title}" --fselect "${tmpdir}/" 22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
+	fileSelected=$(_fselect "${tmpdir}")
 
 	if ! [[ -f "${fileSelected}" ]]; then
 		_msgbox "No file was selected."
@@ -253,6 +253,33 @@ _yesno() {
 		--yesno "${msg}" \
 		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
 	return ${?}
+}
+
+_fselect() {
+	local termh windowh dirlist selected
+	termh=$(tput lines)
+	(( windowh = "${termh}" - 10 ))
+	[[ "${windowh}" -gt "22" ]] && windowh="22"
+	if [[ "${windowh}" -ge "8" ]]; then
+		dialog \
+			--backtitle "${title}" \
+			--fselect "${1}/" \
+			"${windowh}" 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
+	else
+		# in case of a very tiny terminal window
+		# make an array of the filenames and put them into --menu instead
+		while read -r filename; do
+			dirlist+=( "$(basename "${filename}")" )
+			dirlist+=( "$("${innobin}" --gog-game-id "${filename}" |& awk -F'"' '{print $2}' )" )
+
+		done < <(find "${1}" -maxdepth 1 -type f)
+		selected=$(dialog \
+			--backtitle "${title}" \
+			--menu "Choose one" \
+			22 77 16 "${dirlist[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
+		echo "${selected}"
+	fi
+
 }
 
 _error() {
