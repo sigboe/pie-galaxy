@@ -19,7 +19,7 @@ version="0.1"
 
 _depends() {
 	if ! [[ -x "$(command -v dialog)" ]]; then
-		echo "dialog not installed." 3>&1 1>&2 2>&3 >"$(tty)"
+		echo "dialog not installed." >"$(tty)"
 		sleep 10
 		_exit 1
 	fi
@@ -94,7 +94,7 @@ _description() {
 }
 
 _Connect() {
-	availableGames=$("${wyvernbin}" connect ls 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
+	availableGames=$("${wyvernbin}" connect ls 2>&1 >"$(tty)")
 
 	if _yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?"; then
 		"${wyvernbin}" connect claim
@@ -105,12 +105,12 @@ _Connect() {
 
 _Download() {
 	if [[ -z ${selectedGame} ]]; then
-		_msgbox "No game selected, please use ls to list all games you own."
+		_msgbox "No game selected, please use one from your library."
 		return
 	else
 		mkdir -p "${tmpdir}"
 		cd "${tmpdir}/" || _exit 1
-		"${wyvernbin}" down --id "${selectedGame}" --force-windows 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)" || { _error "download failed"; return; }
+		"${wyvernbin}" down --id "${selectedGame}" --force-windows >"$(tty)" || { _error "download failed"; return; }
 		_msgbox "${gameName} finished downloading."
 	fi
 
