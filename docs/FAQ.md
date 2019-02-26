@@ -16,4 +16,12 @@ Open up the ScummVM GUI and add the game. The shortcut in EmulationStation shoul
 
 ## Gamepad in ScummVM games is erratic
 
-Yes, if you get the lr-scummvm emulator, it you get improvements like better gamepad support, and you don't need to add games in the GUI after you install them.
+Yes, if you get the lr-scummvm instead, it you get improvements like better gamepad support, and you don't need to add games in the GUI after you install them.
+
+## why are there symbols displayed like ~D in my game list?
+
+ncurses in Raspbian doesn't like UTF-8 symbols, it renders ™ like ~D. This doesn't happen on other Linux systems, but there may be a way to fix it.
+
+## There is no progress bar while downloading
+
+This bug is only on RetroPie, looking into it.
