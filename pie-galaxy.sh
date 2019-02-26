@@ -157,6 +157,17 @@ _Install() {
 				return;;
 		esac
 
+		# If the setup.exe doesn't have the gameID try to fetch it from the gameName and the library.
+		[[ -z "${gameID}" ]] && gameID=$(echo "${wyvernls}" | jq --raw-output --arg var "${gameName}" '.games[] | .ProductInfo | select(.title==$var) | .id')
+
+		if [[ -z "${gameID}" ]]; then
+			# If setup.exe still doesn't contain gameID, try guessing the slug, and fetchign the ID that way.
+			gameSlug=$(echo "${gameName// /_}" | tr '[:upper:]' '[:lower:]')
+			gameID=$(echo "${wyvernls}" | jq --raw-output --arg var "${gameSlug}" '.games[] | .ProductInfo | select(.slug==$var) | .id')
+		fi
+
+		[[ -z "${gameID}" ]] && { _error "Can't figure out the Game ID. Aborting installation."; return; }
+
 		# shellcheck source=/dev/null
 		source "${exceptions}"
 		match=$(echo "${exceptionList[@]:0}" | grep -o "${gameID}")
@@ -176,7 +187,7 @@ _Install() {
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || { _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."; return; }
 			echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
-			extraMessage="To finish the installation and open ScummVM and add game."
+			extraMessage="To finish the installation and open ScummVM and add game, or install lr-scummvm."
 		elif [[ "$type" == "unsupported" ]]; then
 			_error "${fileSelected} apperantly is unsupported."
 			return
@@ -191,8 +202,12 @@ _extract() {
 	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 	local folder
 	rm -rf "${tmpdir:?}/output" #clean the extract path (is this okay to do like this?)
-	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)" || { _error "Unable to read setup file"; return; }
-	folder=$(dirname "$(find "${tmpdir}"/output -name 'goggame-*.info')")
+	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)"
+	folder=$(dirname "$(find "${tmpdir}/output" -name 'goggame-*.info')")
+	if [[ "${folder}" == "." ]]; then
+		# Didn't find goggame-*.info, now we must rely on exception to catch this install.
+		folder="${tmpdir}/output/app"
+	fi
 	rm -rf "${tmpdir:?}/${gameName}"
 	mv "${folder}" "${tmpdir}/${gameName}"
 }

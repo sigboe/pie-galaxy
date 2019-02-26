@@ -14,6 +14,7 @@ exceptionList=(
     1435827232 #Ultimate DOOM, The
     1207658753 #Teenagent
     1885026907 #Escape from Monkey Island
+    1207659142 #Shadow Warrior Complete
 )
 
 1435827232_exception() { #Ultimate DOOM, The
@@ -62,4 +63,9 @@ _EOF_
         cp "FullMonkeyMap1.imt" "FullMonkeyMap2.imt" || { _error "Could not manipulate texture data"; return; }
     )
     _msgbox "${gameName} Has been installed to ${romdir}/"
+}
+
+1207659142_exception() { #Shadow Warrior Complete
+    mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}"
+    _msgbox "${gameName} Has been installed to ${dosboxdir}/${gameName}"
 }
