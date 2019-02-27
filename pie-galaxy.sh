@@ -208,7 +208,7 @@ _extract() {
 		# Didn't find goggame-*.info, now we must rely on exception to catch this install.
 		folder="${tmpdir}/output/app"
 	fi
-	if [[ -d "${folder}/__support" ]]; then
+	if [[ "$(ls -A "${folder}/__support/app")" ]]; then
 		cp -r "${folder}"/__support/app/* "${folder}/"
 	fi
 	rm -rf "${tmpdir:?}/${gameName}"
