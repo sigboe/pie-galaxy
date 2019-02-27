@@ -20,7 +20,7 @@ Yes, if you get the lr-scummvm instead, it you get improvements like better game
 
 ## why are there symbols displayed like ~D in my game list?
 
-ncurses in Raspbian doesn't like UTF-8 symbols, it renders ™ like ~D. This doesn't happen on other Linux systems, but there may be a way to fix it.
+This is due to RetroPie not being configured to use UTF-8. I will submit a pull request to RetroPie to fix this sometime in the future.
 
 ## There is no progress bar while downloading
 

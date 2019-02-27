@@ -14,20 +14,14 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 * Claim games available fro GOG connect
 * List all the games you own, and read their description
 * Download any game you own
-* Install games ([See compatibility list](#compatiblity))
+* Install games ([See compatibility list](Compatiblity.md) shortlist below.)
 
 ## Compatiblity
 
-* DOSBox games
-  * Every game I have tested thus far has worked
-  * Teenagent will install as a ScummVM game
-* ScummVM games
-  * Every game I have tested thus far has worked
+* All DOSBox games
+* All ScummVM games
 * ResidualVM games
-  * Escape from Monkey Island (**Works!**)
-  * Myst 3 (Not added support **yet**)
-  * The Longest Journey (Not supported **yet**)
-  * Grim Fandango (Not for sale on GOG, Remaster is not supported)
+  * Escape from Monkey Island
 * Native games
   * Ultimate DOOM, The
 
