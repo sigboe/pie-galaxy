@@ -10,7 +10,7 @@ Before this application is comepletely finished, installation will have to be do
 
 Of course you know this already, just open a terminal and type:
 
-   ssh pi@<IP-Address> 
+   ssh pi@[IP-Address]
 
 The default password is raspberry, the IP address can be found in the RetroPie menu on the main menu.
 
@@ -21,6 +21,10 @@ Just read the official documentation :D
 https://www.raspberrypi.org/documentation/remote-access/ssh/windows.md
 
 ## Installing
+
+You need to make sure you have a recent retropie-setup version.
+The install script requires commit 872e2ae or newer, from february 27, 2019.
+If you have an older version update the retropie-setup script first.
 
 Download the packagefile
 
