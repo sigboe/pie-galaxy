@@ -1,5 +1,9 @@
 # Frequently Asked Questions
 
+## Your code is bad and you should feel bad
+
+This may be a valid point. If you care to elaborate, please open an issue and explain how I can improve.
+
 ## I can't I select a file to install
 
 Its the ncurses filemanager that expects you to move the cursor to a file and press `Space`.
@@ -18,10 +22,14 @@ Open up the ScummVM GUI and add the game. The shortcut in EmulationStation shoul
 
 Yes, if you get the lr-scummvm instead, it you get improvements like better gamepad support, and you don't need to add games in the GUI after you install them.
 
-## why are there symbols displayed like ~D in my game list?
+## There symbols displayed like ~D in my game list
 
 This is due to RetroPie not being configured to use UTF-8. I will submit a pull request to RetroPie to fix this sometime in the future.
 
 ## There is no progress bar while downloading
 
 This bug is only on RetroPie, looking into it.
+
+## There is a `not a tty` file
+
+Known bug, its harmless. I will fix it, its just not a top priority bug.
