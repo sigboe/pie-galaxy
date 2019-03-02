@@ -1,17 +1,19 @@
 # Compatibility
 
+This compatiblity list may be moved into the wiki, or another page where people can come with feedback.
+
 ## Native
 
 ### Ultimate DOOM, The
 
 * Origninally a DOSBox game
 * Installs using lr-prboom (can change it to another source port)
-* script to zip and unzip the savefile to cohere with other games using lr-prboom 
+* script to zip and unzip the savefile to cohere with other games using lr-prboom
 * Works
 
 ## DOSBox
 
-### Akalabeth 
+### Akalabeth - World of Doom
 
 * Installs
 * Keyboard
@@ -23,7 +25,7 @@
 * Keyboard
 * Works
 
-### Jill of the Jungle
+### Jill of the Jungle - The Complete Trilogy
 
 * Installs
 * Keyboard
@@ -47,7 +49,7 @@
 * Keyboard
 * Works
 
-### The Elder Scrolls - Daggerfall
+### The Elder Scrolls II - Daggerfall
 
 * Installs
 * Keyboard

@@ -18,8 +18,10 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 
 ## Compatiblity
 
-* All DOSBox games
-* All ScummVM games
+Summary:
+
+* DOSBox games
+* All (I think) ScummVM games
 * ResidualVM games
   * Escape from Monkey Island
 * Native games
@@ -47,3 +49,13 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 * Basic friend support
   * List friends online status
   * Maybe more
+
+## Contribution
+
+There are a number of ways you can contribute.
+
+For regular users, please file bugreports if you find any bugs. Please put in as much detail as you can. If you want to learn how Github works, maybe you can open a pull request fixing any typos in the documentation. :D
+
+For technical users, maybe you can contribute to the exceptions list. I also welcome pull requests to the code base. Or even just code review/commenting on the code.
+
+If you really want do do a monitary contribution, the only thing I would have a heart to accept is GOG.com gifts. If you seriously want to do a monitary contribution, you can contact me on [reddit/u/sigb](https://reddit.com/u/sigb), if you want me to work on a specific game, maybe we can do some basic information gathering before spending any money to check the feasability of getting it to work.
