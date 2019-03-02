@@ -7,7 +7,7 @@
 title="Pie Galaxy"
 tmpdir="${HOME}/tmp/piegalaxy"
 romdir="${HOME}/RetroPie/roms"
-dosboxdir="${romdir}/pc"
+dosboxdir="${romdir}/pc/gog"
 scummvmdir="${romdir}/scummvm"
 scriptdir="$(dirname "$(readlink -f "${0}")")"
 wyvernbin="${scriptdir}/wyvern"
@@ -133,7 +133,7 @@ _Sync() {
 }
 
 _Install() {
-	local fileSelected setupInfo gameName gameID match type shortName extraMessage
+	local fileSelected setupInfo gameName gameID match type shortName
 	fileSelected=$(_fselect "${tmpdir}")
 
 	if ! [[ -f "${fileSelected}" ]]; then
@@ -168,6 +168,9 @@ _Install() {
 
 		[[ -z "${gameID}" ]] && { _error "Can't figure out the Game ID. Aborting installation."; return; }
 
+		#Sanitize game name
+		gameName=$(echo "${gameName}" | sed -e 's:™::g' -e 's:  *: :g' )
+
 		# shellcheck source=/dev/null
 		source "${exceptions}"
 		match=$(echo "${exceptionList[@]:0}" | grep -o "${gameID}")
@@ -177,26 +180,26 @@ _Install() {
 			return
 		else
 			_extract
+			[[ -d "${tmpdir}/${gameName}" ]] || return
 		fi
 
 		type=$(_getType "${gameName}")
 
 		if [[ "$type" == "dosbox" ]]; then
-			mv -f "${tmpdir}/${gameName}" "${dosboxdir}/" || { _error "Uname to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."; return; }
-			mkdir "${dosboxdir}/launchers"
-			cd "${dosboxdir}/launchers" || | { _error "unable to access {dosboxdir}/launchers\nFailed to create launcher."
-			ln -s "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || | { _error "Failed to create launcher."
+			mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}" || { _error "Uname to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."; return; }
+			cd "${romdir}/pc" || _error "unable to access ${romdir}/pc\nFailed to create launcher."
+			ln -s "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || _error "Failed to create launcher."
+			_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
 		elif [[ "$type" == "scummvm" ]]; then
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
 			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || { _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."; return; }
 			echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
-			extraMessage="To finish the installation and open ScummVM and add game, or install lr-scummvm."
+			_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${scummvmdir}\n\nTo finish the installation and open ScummVM and add game, or install lr-scummvm." --title "${gameName} was installed."
 		elif [[ "$type" == "unsupported" ]]; then
 			_error "${fileSelected} apperantly is unsupported."
 			return
 		fi
 
-		_msgbox "${gameName} was installed.\n${gameID}\n${fileSelected} was extracted and installed to ${romdir}\n\n${extraMessage}"
 	fi
 
 }
@@ -205,16 +208,17 @@ _extract() {
 	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 	local folder
 	rm -rf "${tmpdir:?}/output" #clean the extract path (is this okay to do like this?)
+	rm -rf "${tmpdir:?}/${gameName}" #also cleanup where to move the files
+	mkdir -p "${tmpdir}/output" | { _error "Could not initialize temp folder for extraction"; return; } 
 	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)"
 	folder=$(dirname "$(find "${tmpdir}/output" -name 'goggame-*.info')")
 	if [[ "${folder}" == "." ]]; then
 		# Didn't find goggame-*.info, now we must rely on exception to catch this install.
 		folder="${tmpdir}/output/app"
 	fi
-	if [[ "$(ls -A "${folder}/__support/app")" ]]; then
+	if [[ -n "$(ls -A "${folder}/__support/app")" ]]; then
 		cp -r "${folder}"/__support/app/* "${folder}/"
 	fi
-	rm -rf "${tmpdir:?}/${gameName}"
 	mv "${folder}" "${tmpdir}/${gameName}"
 }
 
