@@ -14,7 +14,7 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 * Claim games available fro GOG connect
 * List all the games you own, and read their description
 * Download any game you own
-* Install games ([See compatibility list](Compatiblity.md) shortlist below.)
+* Install games ([See compatibility list](Compatibility.md) shortlist below.)
 
 ## Compatiblity
 
