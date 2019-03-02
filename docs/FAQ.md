@@ -24,7 +24,8 @@ Yes, if you get the lr-scummvm instead, it you get improvements like better game
 
 ## There symbols displayed like ~D in my game list
 
-This is due to RetroPie not being configured to use UTF-8. I will submit a pull request to RetroPie to fix this sometime in the future.
+This is due to RetroPie not being configured to use UTF-8. Looking into different ways to handle this.
+If you want you can set the variables LC_ALL and LANGUAGE in your .bashrc file, but a program like this should not do such a thing for you.
 
 ## There is no progress bar while downloading
 
