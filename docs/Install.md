@@ -16,9 +16,7 @@ The default password is raspberry, the IP address can be found in the RetroPie m
 
 ### Windows
 
-Just read the official documentation :D
-
-https://www.raspberrypi.org/documentation/remote-access/ssh/windows.md
+Follow the [official documentation :D](https://www.raspberrypi.org/documentation/remote-access/ssh/windows.md)
 
 ## Installing
 
@@ -28,7 +26,7 @@ If you have an older version update the retropie-setup script first.
 
 Download the packagefile
 
-    wget -O "${HOME}/scriptmodules/ports/piegalaxy.sh" https://raw.githubusercontent.com/sigboe/pie-galaxy/master/scriptmodule.sh
+    wget -O "${HOME}/RetroPie-Setup/scriptmodules/ports/piegalaxy.sh" https://raw.githubusercontent.com/sigboe/pie-galaxy/master/scriptmodule.sh
 
 Run the package installer
 
@@ -47,4 +45,4 @@ The token is in the URL of the webbrowser, copy everything after code= and paste
 
 If you managed to do it correctly, you should see a list of all your games.
 
-Restart EmulationStation, or Reboot, and the program will show up in EmulationStation.
+Restart EmulationStation, or Reboot, and the program will show up in EmulationStation under Ports.
