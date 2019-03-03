@@ -52,7 +52,7 @@ _EOF_
 }
 
 1885026907_exception() { #Escape from Monkey Island
-    mv -f "${tmpdir}/${gameName}" "${romdir}/residualvm/${gameName}" || { _error "Could not copy games to ${romdir}/residualvm/"; return; }
+    mv -f "${tmpdir}/${gameName}" "${romdir}/residualvm/${gameName}" || { _error "Could not copy games to ${romdir}/residualvm/\n\nCheck if ResidualVM is installed."; return; }
     (
         cd "${romdir}/residualvm/${gameName}" || { _error "Could not access ${romdir}/residualvm/${gameName}"; return; }
         curl -o "MonkeyUpdate.exe" -O "https://demos.residualvm.org/patches/MonkeyUpdate.exe"
