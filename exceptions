@@ -66,6 +66,8 @@ _EOF_
 }
 
 1207659142_exception() { #Shadow Warrior Complete
-    mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}"
-    _msgbox "${gameName} Has been installed to ${dosboxdir}/${gameName}"
+    mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}" || { _error "Uname to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."; return; }
+    cd "${romdir}/pc" || _error "unable to access ${romdir}/pc\nFailed to create launcher."
+    ln -s "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || _error "Failed to create launcher."
+    _msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
 }
