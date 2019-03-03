@@ -227,7 +227,7 @@ _getType() {
 	local gamePath type
 	gamePath=$(cat "${tmpdir}/${1}/"goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
 
-	if [[ "${gamePath}" == *"DOSBOX"* ]]; then
+	if [[ "${gamePath}" == *"DOSBOX"* ]] || [[ -d "${tmpdir}/${1}/DOSBOX" ]]; then
 		type="dosbox"
 	elif [[ "${gamePath}" == *"scummvm"* ]]; then
 		type="scummvm"
