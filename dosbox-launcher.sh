@@ -3,6 +3,9 @@
 dosboxromdir="${HOME}/RetroPie/roms/pc/gog"
 game=$(basename -s .sh "${0}")
 
+# DOSBox settings override
+export DOSBOX_SDL_USESCANCODES=false
+
 if [[ -x "/opt/retropie/emulators/dosbox/bin/dosbox" ]]; then
 	emu="/opt/retropie/emulators/dosbox/bin/dosbox"
 fi
@@ -49,4 +52,4 @@ fi
 
 echo "Found arugments: ${dosboxargs[*]}"
 
-DOSBOX_SDL_USESCANCODES=false "${emu:-dosbox}" ${dosboxargs[@]}
+"${emu:-dosbox}" ${dosboxargs[@]}
