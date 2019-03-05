@@ -5,7 +5,8 @@
 # shellcheck disable=SC2094 # Dirty hack avoid runcommand to steal stdout
 
 title="Pie Galaxy"
-tmpdir="${HOME}/tmp/piegalaxy"
+tmpdir="${HOME}/.cache/piegalaxy"
+downdir="${HOME}/Downloads"
 romdir="${HOME}/RetroPie/roms"
 dosboxdir="${romdir}/pc/gog"
 scummvmdir="${romdir}/scummvm"
@@ -17,6 +18,15 @@ renderhtml="html2text"
 exceptionList="" #empty var, this will be overrwritten at runime
 version="0.1"
 
+if [[ -n "${XDG_CACHE_HOME}" ]]; then
+	tmpdir="${XDG_CACHE_HOME}/piegalaxy"
+fi
+
+if [[ -n "${XDG_CONFIG_HOME}" ]]; then
+	configfile="${XDG_CONFIG_HOME}/piegalaxy/piegalaxy.conf"
+fi
+
+if [[ -f "${configfile}" ]]; then
 _depends() {
 	if ! [[ -x "$(command -v dialog)" ]]; then
 		echo "dialog not installed." >"$(tty)"
@@ -108,8 +118,8 @@ _Download() {
 		_msgbox "No game selected, please use one from your library."
 		return
 	else
-		mkdir -p "${tmpdir}"
-		cd "${tmpdir}/" || _exit 1
+		mkdir -p "${downdir}"
+		cd "${downdir}/" || _exit "Could not interact with download directory" 1
 		"${wyvernbin}" down --id "${selectedGame}" --force-windows >"$(tty)" || { _error "download failed"; return; }
 		_msgbox "${gameName} finished downloading."
 	fi
@@ -134,7 +144,7 @@ _Sync() {
 
 _Install() {
 	local fileSelected setupInfo gameName gameID match type shortName
-	fileSelected=$(_fselect "${tmpdir}")
+	fileSelected=$(_fselect "${downdir}")
 
 	if ! [[ -f "${fileSelected}" ]]; then
 		_msgbox "No file was selected."
