@@ -16,6 +16,8 @@ innobin="${scriptdir}/innoextract"
 exceptions="${scriptdir}/exceptions"
 renderhtml="html2text"
 exceptionList="" #empty var, this will be overrwritten at runime
+retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
+configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 version="0.1"
 
 if [[ -n "${XDG_CACHE_HOME}" ]]; then
@@ -27,6 +29,15 @@ if [[ -n "${XDG_CONFIG_HOME}" ]]; then
 fi
 
 if [[ -f "${configfile}" ]]; then
+	if egrep -q -v '^#|^[^ ]*=[^;]*' "{$configfile}"; then
+		echo "Config file is unclean, cleaning it..." >&2
+		mv "${configfile}" "$(dirname ${configfile})/dirty.conf" 
+		egrep '^#|^[^ ]*=[^;&]*'  "$(dirname ${configfile})/dirty.conf"  > "${configfile}"
+	fi
+	# shellcheck source=/dev/null
+	source "${configfile}"
+fi
+
 _depends() {
 	if ! [[ -x "$(command -v dialog)" ]]; then
 		echo "dialog not installed." >"$(tty)"
@@ -312,16 +323,16 @@ _error() {
 }
 
 _joy2key() {
-	if [[ -f "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh" ]]; then
+	if [[ -f "${retropiehelper}" ]]; then
 		local scriptdir="/home/pi/RetroPie-Setup"
 		# shellcheck source=/dev/null
-		source "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
+		source "${retropiehelper}"
 		joy2keyStart
 	fi
 }
 _exit() {
 	clear
-	if [[ -f "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh" ]]; then
+	if [[ -f "${retropiehelper}" ]]; then
 		joy2keyStop
 	fi
 	exit "${1:-0}"
