@@ -16,7 +16,7 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 * Download any game you own
 * Install games ([See compatibility list](Compatibility.md) shortlist below.)
 
-## Compatiblity
+## Compatibility
 
 Summary:
 
