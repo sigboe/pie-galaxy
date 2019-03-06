@@ -131,7 +131,7 @@ _Download() {
 	else
 		mkdir -p "${downdir}"
 		cd "${downdir}/" || _exit "Could not interact with download directory" 1
-		"${wyvernbin}" down --id "${selectedGame}" --force-windows >"$(tty)" || { _error "download failed"; return; }
+		"${wyvernbin}" down --id "${selectedGame}" --force-windows || { _error "download failed"; return; }
 		_msgbox "${gameName} finished downloading."
 	fi
 
@@ -271,7 +271,7 @@ _msgbox() {
 		--backtitle "${title}" \
 		"${opts[@]}" \
 		--msgbox "${msg}" \
-		22 77 >"$(tty)" <"$(tty)"
+		22 77  <"$(tty)"
 }
 
 _yesno() {
