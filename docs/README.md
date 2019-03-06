@@ -4,6 +4,8 @@ A GOG client for RetroPie and other GNU/Linux distributions. It uses [Wyvern](ht
 
 Pie Galaxy does not support every game yet, and is not feature complete. And is provided without warranty.
 
+![](resources/demo.gif)
+
 ## Installing
 
 Hopefully you will be able to install this program from the RetroPie setup menu soon.
