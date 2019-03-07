@@ -6,6 +6,7 @@
 # ${tmpdir}/${gameName} Where the game files got extracted, before install
 # ${gameID}             Each product has an ID number, not usually visible to the end user
 # ${romdir}             Folder that has rom folders for different emulators
+# ${biosdir}            Folder for BIOS roms
 # ${dosboxdir}          ${romdir}/pc
 # ${scummvmdir}         ${romdir}/scummvm
 # You can write error messages for commands that fail by ending the command like so || _error "What failed and why"
@@ -14,6 +15,9 @@ exceptionList=(
     1435827232 #Ultimate DOOM, The
     1207658753 #Teenagent
     1885026907 #Escape from Monkey Island
+    1207666473 #Wings (Emulated Amiga Edition)
+    1207666773 #Rocket Ranger
+    1207665703 #Defender of the Crown
 )
 
 1435827232_exception() { #Ultimate DOOM, The
@@ -62,4 +66,28 @@ _EOF_
         cp "FullMonkeyMap1.imt" "FullMonkeyMap2.imt" || { _error "Could not manipulate texture data"; return; }
     )
     _msgbox "${gameName} Has been installed to ${romdir}/"
+}
+
+1207666473_exception() {
+    unzip "${tmpdir}/${gameName}/Wings.exe" -d "${tmpdir}/${gameName}"
+    cp "${tmpdir}/${gameName}/Media GOG/Kick12.rom" "${biosdir}/" || { _error "Could not write to ${biosdir}"; return; }
+    echo "Ripping wings disks"
+    dd "if=${tmpdir}/${gameName}/Media GOG/romwings.bin" "of=${tmpdir}/${gameName}/wings-1.adf" bs=1 skip=4 count=901120
+    dd "if=${tmpdir}/${gameName}/Media GOG/romwings.bin" "of=${tmpdir}/${gameName}/wings-2.adf" bs=1 skip=901124 count=901120
+    cp "${tmpdir}/${gameName}"/wings-{1,2}.adf "${romdir}/amiga/" || { _error "Could not copy rom files.\n\nThis usually happens when no Amiga emulator is installed."; return; }
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga"
+}
+
+1207666773_exception() {
+    unzip "${tmpdir}/${gameName}/RocketRanger.exe" -d "${tmpdir}/${gameName}"
+    cp "${tmpdir}/${gameName}/Media/Kick12.rom" "${biosdir}/" || { _error "Could not write to ${biosdir}"; return; }
+    cp "${tmpdir}/${gameName}"/Media/RocketRanger-{1,2}.adf "${romdir}/amiga/" || { _error "Could not copy rom files.\n\nThis usually happens when no Amiga emulator is installed."; return; }
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga"
+}
+
+1207665703_exception() {
+    unzip "${tmpdir}/${gameName}/Defender of the Crown.exe" -d "${tmpdir}/${gameName}"
+    cp "${tmpdir}/${gameName}/Media/Kick12.rom" "${biosdir}/" || { _error "Could not write to ${biosdir}"; return; }
+    cp "${tmpdir}/${gameName}"/Media/dotc-{1,2}.adf "${romdir}/amiga/" || { _error "Could not copy rom files.\n\nThis usually happens when no Amiga emulator is installed."; return; }
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga"
 }
