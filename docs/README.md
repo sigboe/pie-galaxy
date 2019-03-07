@@ -13,7 +13,7 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 
 ## Features
 
-* Claim games available fro GOG connect
+* Claim games available from GOG connect
 * List all the games you own, and read their description
 * Download any game you own
 * Install games ([See compatibility list](Compatibility.md) shortlist below.)
