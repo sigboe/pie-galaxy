@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2034 # variables are sourced from here, no need to error
-# shellcheck disable=SC2154 # variables are inherrited when sourced, o need to error
+# shellcheck disable=SC2154 # variables are inherrited when sourced, no need to error
 # Useful variables:
 # ${gameName}           Name of the game as it appears on GOG.com
 # ${tmpdir}/${gameName} Where the game files got extracted, before install
@@ -10,15 +9,6 @@
 # ${dosboxdir}          ${romdir}/pc
 # ${scummvmdir}         ${romdir}/scummvm
 # You can write error messages for commands that fail by ending the command like so || _error "What failed and why"
-
-exceptionList=(
-    1435827232 #Ultimate DOOM, The
-    1207658753 #Teenagent
-    1885026907 #Escape from Monkey Island
-    1207666473 #Wings (Emulated Amiga Edition)
-    1207666773 #Rocket Ranger
-    1207665703 #Defender of the Crown
-)
 
 1435827232_exception() { #Ultimate DOOM, The
     sudo apt install zip
@@ -68,9 +58,9 @@ _EOF_
     _msgbox "${gameName} Has been installed to ${romdir}/"
 }
 
-1207666473_exception() {
+1207666473_exception() { #Wings (Emulated Amiga Edition)
     unzip "${tmpdir}/${gameName}/Wings.exe" -d "${tmpdir}/${gameName}"
-    cp "${tmpdir}/${gameName}/Media GOG/Kick12.rom" "${biosdir}/" || { _error "Could not write to ${biosdir}"; return; }
+    cp "${tmpdir}/${gameName}/Media GOG/Kick12.rom" "${biosdir}/kick12.rom" || { _error "Could not write to ${biosdir}"; return; }
     echo "Ripping wings disks"
     dd "if=${tmpdir}/${gameName}/Media GOG/romwings.bin" "of=${tmpdir}/${gameName}/wings-1.adf" bs=1 skip=4 count=901120
     dd "if=${tmpdir}/${gameName}/Media GOG/romwings.bin" "of=${tmpdir}/${gameName}/wings-2.adf" bs=1 skip=901124 count=901120
@@ -78,16 +68,16 @@ _EOF_
     _msgbox "${gameName} Has been installed to ${romdir}/amiga"
 }
 
-1207666773_exception() {
+1207666773_exception() { #Rocket Ranger (Emulated Amiga Edition)
     unzip "${tmpdir}/${gameName}/RocketRanger.exe" -d "${tmpdir}/${gameName}"
-    cp "${tmpdir}/${gameName}/Media/Kick12.rom" "${biosdir}/" || { _error "Could not write to ${biosdir}"; return; }
+    cp "${tmpdir}/${gameName}/Media/Kick12.rom" "${biosdir}/kick12.rom" || { _error "Could not write to ${biosdir}"; return; }
     cp "${tmpdir}/${gameName}"/Media/RocketRanger-{1,2}.adf "${romdir}/amiga/" || { _error "Could not copy rom files.\n\nThis usually happens when no Amiga emulator is installed."; return; }
     _msgbox "${gameName} Has been installed to ${romdir}/amiga"
 }
 
-1207665703_exception() {
+1207665703_exception() { #Defender of the Crown
     unzip "${tmpdir}/${gameName}/Defender of the Crown.exe" -d "${tmpdir}/${gameName}"
-    cp "${tmpdir}/${gameName}/Media/Kick12.rom" "${biosdir}/" || { _error "Could not write to ${biosdir}"; return; }
+    cp "${tmpdir}/${gameName}/Media/Kick12.rom" "${biosdir}/kick12.rom" || { _error "Could not write to ${biosdir}"; return; }
     cp "${tmpdir}/${gameName}"/Media/dotc-{1,2}.adf "${romdir}/amiga/" || { _error "Could not copy rom files.\n\nThis usually happens when no Amiga emulator is installed."; return; }
     _msgbox "${gameName} Has been installed to ${romdir}/amiga"
 }

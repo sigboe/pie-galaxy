@@ -4,6 +4,8 @@
 # https://github.com/sigboe/pie-galaxy/blob/master/LICENSE
 # shellcheck disable=SC2094 # Dirty hack avoid runcommand to steal stdout
 
+#Default settings don't edit as they will be overwritten when you update the program
+#set prefrences in ~/.config/piegalaxy/piegalaxy.conf
 title="Pie Galaxy"
 tmpdir="${HOME}/.cache/piegalaxy"
 downdir="${HOME}/Downloads"
@@ -16,7 +18,6 @@ wyvernbin="${scriptdir}/wyvern"
 innobin="${scriptdir}/innoextract"
 exceptions="${scriptdir}/exceptions"
 renderhtml="html2text"
-exceptionList="" #empty var, this will be overrwritten at runime
 retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 version="0.1"
@@ -30,14 +31,17 @@ if [[ -n "${XDG_CONFIG_HOME}" ]]; then
 fi
 
 if [[ -f "${configfile}" ]]; then
-	if egrep -q -v '^#|^[^ ]*=[^;]*' "{$configfile}"; then
+	if grep -E -q -v '^#|^[^ ]*=[^;]*' "{$configfile}"; then
 		echo "Config file is unclean, cleaning it..." >&2
-		mv "${configfile}" "$(dirname ${configfile})/dirty.conf" 
-		egrep '^#|^[^ ]*=[^;&]*'  "$(dirname ${configfile})/dirty.conf"  > "${configfile}"
+		mv "${configfile}" "$(dirname "${configfile}")/dirty.conf" 
+		grep -E '^#|^[^ ]*=[^;&]*'  "$(dirname "${configfile}")/dirty.conf"  > "${configfile}"
 	fi
 	# shellcheck source=/dev/null
 	source "${configfile}"
 fi
+
+# shellcheck source=exceptions
+source "${exceptions}"
 
 _depends() {
 	if ! [[ -x "$(command -v dialog)" ]]; then
@@ -155,7 +159,7 @@ _Sync() {
 }
 
 _Install() {
-	local fileSelected setupInfo gameName gameID match type shortName
+	local fileSelected setupInfo gameName gameID type shortName
 	fileSelected=$(_fselect "${downdir}")
 
 	if ! [[ -f "${fileSelected}" ]]; then
@@ -193,16 +197,14 @@ _Install() {
 		#Sanitize game name
 		gameName=$(echo "${gameName}" | sed -e 's:™::g' -e 's:  *: :g' )
 
-		# shellcheck source=/dev/null
-		source "${exceptions}"
-		match=$(echo "${exceptionList[@]:0}" | grep -o "${gameID}")
-		if [[ -n "${match}" ]]; then
-			_extract
+		_extract
+
+		if type "${gameID}_exception" &> /dev/null; then
 			"${gameID}_exception"
 			return
-		else
-			_extract
-			[[ -d "${tmpdir}/${gameName}" ]] || return
+		elif [[ ! -d "${tmpdir}/${gameName}" ]]; then
+			_error "Extraction did not succeed"
+			return
 		fi
 
 		type=$(_getType "${gameName}")
