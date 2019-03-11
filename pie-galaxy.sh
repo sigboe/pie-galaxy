@@ -20,7 +20,7 @@ exceptions="${scriptdir}/exceptions"
 renderhtml="html2text"
 retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
-version="0.1"
+version="0.2"
 
 if [[ -n "${XDG_CACHE_HOME}" ]]; then
 	tmpdir="${XDG_CACHE_HOME}/piegalaxy"
