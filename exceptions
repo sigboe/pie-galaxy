@@ -78,11 +78,9 @@ floppy0=/home/pi/RetroPie/roms/amiga/gog/wings-1.adf
 floppy1=/home/pi/RetroPie/roms/amiga/gog/wings-2.adf
 nr_floppies=2
 floppy_speed=800
-gfx_center_horizontal=smart
-gfx_center_vertical=smart
 _EOF_
 
-    _msgbox "${gameName} Has been installed to ${romdir}/amiga"
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga\n\nSuggested emulator Amiberry"
 }
 
 1207666773_exception() { #Rocket Ranger (Emulated Amiga Edition)
@@ -100,11 +98,9 @@ floppy0=/home/pi/RetroPie/roms/amiga/gog/RocketRanger-1.adf
 floppy1=/home/pi/RetroPie/roms/amiga/gog/RocketRanger-2.adf
 nr_floppies=2
 floppy_speed=800
-gfx_center_horizontal=smart
-gfx_center_vertical=smart
 _EOF_
 
-    _msgbox "${gameName} Has been installed to ${romdir}/amiga"
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga\n\nSuggested emulator Amiberry"
 }
 
 1207665703_exception() { #Defender of the Crown
@@ -122,9 +118,7 @@ floppy0=/home/pi/RetroPie/roms/amiga/gog/dotc-1.adf
 floppy1=/home/pi/RetroPie/roms/amiga/gog/dotc-2.adf
 nr_floppies=2
 floppy_speed=800
-gfx_center_horizontal=smart
-gfx_center_vertical=smart
 _EOF_
     
-    _msgbox "${gameName} Has been installed to ${romdir}/amiga"
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga\n\nSuggested emulator Amiberry"
 }
