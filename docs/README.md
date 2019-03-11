@@ -26,6 +26,8 @@ Summary:
 * All (I think) ScummVM games
 * ResidualVM games
   * Escape from Monkey Island
+* Amiga games
+  * may have some issues still
 * Native games
   * Ultimate DOOM, The
 
