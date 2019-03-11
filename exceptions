@@ -1,25 +1,20 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2034 # variables are sourced from here, no need to error
-# shellcheck disable=SC2154 # variables are inherrited when sourced, o need to error
+# shellcheck disable=SC2154 # variables are inherrited when sourced, no need to error
 # Useful variables:
 # ${gameName}           Name of the game as it appears on GOG.com
 # ${tmpdir}/${gameName} Where the game files got extracted, before install
 # ${gameID}             Each product has an ID number, not usually visible to the end user
 # ${romdir}             Folder that has rom folders for different emulators
+# ${biosdir}            Folder for BIOS roms
 # ${dosboxdir}          ${romdir}/pc
 # ${scummvmdir}         ${romdir}/scummvm
 # You can write error messages for commands that fail by ending the command like so || _error "What failed and why"
-
-exceptionList=(
-    1435827232 #Ultimate DOOM, The
-    1207658753 #Teenagent
-    1885026907 #Escape from Monkey Island
-)
 
 1435827232_exception() { #Ultimate DOOM, The
     sudo apt install zip
     mkdir -p "${romdir}/ports/doom" || { _error "Could not create folder ${romdir}/ports/doom"; return; }
     cp "${tmpdir}/${gameName}/DOOM.WAD" "${romdir}/ports/doom/" || { _error "Could not copy DOOM.WAD to install directory"; return; }
+
     cat <<'_EOF_' >>"${romdir}/ports/Ultimate Doom.sh"
 #!/usr/bin/env bash
 # This file is borrowed from https://raw.githubusercontent.com/crcerror/launch-doom-packs-RP/6479af76bf7909711245763a1c7e707f852d56b2/DOOM%20-%201.sh
@@ -37,6 +32,7 @@ fi
 "/opt/retropie/supplementary/runcommand/runcommand.sh" 0 _PORT_ "doom" "${path}/$wadfile"
 cd "$path" && zip -mj "savegames_${wadfile%.*}.zip" prbmsav?.dsg
 _EOF_
+
     chmod +x "${romdir}/ports/Ultimate Doom.sh" || { _error "Could not create install script"; return; }
     if _yesno "${gameName} has been installed to ${romdir}/ports/doom.\nSelect yes to build libretro PrBoom, to use as the engine.\nSelect No to skip build."; then
         sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom || { _error "Could not install lr-prboom"; return; }
@@ -62,4 +58,67 @@ _EOF_
         cp "FullMonkeyMap1.imt" "FullMonkeyMap2.imt" || { _error "Could not manipulate texture data"; return; }
     )
     _msgbox "${gameName} Has been installed to ${romdir}/"
+}
+
+1207666473_exception() { #Wings (Emulated Amiga Edition)
+    unzip "${tmpdir}/${gameName}/Wings.exe" -d "${tmpdir}/${gameName}"
+    mkdir -p "${biosdir}/Amiga" 
+    cp "${tmpdir}/${gameName}/Media GOG/Kick12.rom" "${biosdir}/Amiga/kick12.rom" || { _error "Could not write to ${biosdir}"; return; }
+    echo "Ripping wings disks"
+    dd "if=${tmpdir}/${gameName}/Media GOG/romwings.bin" "of=${tmpdir}/${gameName}/wings-1.adf" bs=1 skip=4 count=901120
+    dd "if=${tmpdir}/${gameName}/Media GOG/romwings.bin" "of=${tmpdir}/${gameName}/wings-2.adf" bs=1 skip=901124 count=901120
+    mkdir -p "${romdir}/amiga/gog"
+    cp "${tmpdir}/${gameName}"/wings-{1,2}.adf "${romdir}/amiga/gog" || { _error "Could not copy rom files.\n\nThis usually happens when no Amiga emulator is installed."; return; }
+
+    cat <<'_EOF_' >>"${romdir}/amiga/Wings.uae"
+use_gui=no
+kickstart_rom_file=/home/pi/RetroPie/BIOS/Amiga/kick12.rom
+kickstart_rom_file_id=A6CE1636,KS ROM v1.2 (A500,A1000,A2000)
+floppy0=/home/pi/RetroPie/roms/amiga/gog/wings-1.adf
+floppy1=/home/pi/RetroPie/roms/amiga/gog/wings-2.adf
+nr_floppies=2
+floppy_speed=800
+_EOF_
+
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga\n\nSuggested emulator Amiberry"
+}
+
+1207666773_exception() { #Rocket Ranger (Emulated Amiga Edition)
+    unzip "${tmpdir}/${gameName}/RocketRanger.exe" -d "${tmpdir}/${gameName}"
+    mkdir -p "${biosdir}/Amiga" 
+    cp "${tmpdir}/${gameName}/Media/Kick12.rom" "${biosdir}/Amiga/kick12.rom" || { _error "Could not write to ${biosdir}"; return; }
+    mkdir -p "${romdir}/amiga/gog"
+    cp "${tmpdir}/${gameName}"/Media/RocketRanger-{1,2}.adf "${romdir}/amiga/gog" || { _error "Could not copy rom files.\n\nThis usually happens when no Amiga emulator is installed."; return; }
+
+    cat <<'_EOF_' >>"${romdir}/amiga/Rocket Ranger.uae"
+use_gui=no
+kickstart_rom_file=/home/pi/RetroPie/BIOS/Amiga/kick12.rom
+kickstart_rom_file_id=A6CE1636,KS ROM v1.2 (A500,A1000,A2000)
+floppy0=/home/pi/RetroPie/roms/amiga/gog/RocketRanger-1.adf
+floppy1=/home/pi/RetroPie/roms/amiga/gog/RocketRanger-2.adf
+nr_floppies=2
+floppy_speed=800
+_EOF_
+
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga\n\nSuggested emulator Amiberry"
+}
+
+1207665703_exception() { #Defender of the Crown
+    unzip "${tmpdir}/${gameName}/Defender of the Crown.exe" -d "${tmpdir}/${gameName}"
+    mkdir -p "${biosdir}/Amiga" 
+    cp "${tmpdir}/${gameName}/Media/Kick12.rom" "${biosdir}/Amiga/kick12.rom" || { _error "Could not write to ${biosdir}"; return; }
+    mkdir -p "${romdir}/amiga/gog"
+    cp "${tmpdir}/${gameName}"/Media/dotc-{1,2}.adf "${romdir}/amiga/gog" || { _error "Could not copy rom files.\n\nThis usually happens when no Amiga emulator is installed."; return; }
+    
+    cat <<'_EOF_' >>"${romdir}/amiga/Defender of the Crown.uae"   
+use_gui=no
+kickstart_rom_file=/home/pi/RetroPie/BIOS/Amiga/kick12.rom
+kickstart_rom_file_id=A6CE1636,KS ROM v1.2 (A500,A1000,A2000)
+floppy0=/home/pi/RetroPie/roms/amiga/gog/dotc-1.adf
+floppy1=/home/pi/RetroPie/roms/amiga/gog/dotc-2.adf
+nr_floppies=2
+floppy_speed=800
+_EOF_
+    
+    _msgbox "${gameName} Has been installed to ${romdir}/amiga\n\nSuggested emulator Amiberry"
 }

@@ -126,3 +126,17 @@ Reccomend lr-scummvm for automatic shortcut and gamepad support pre-setup.
 * Need to add the game in the ResidualVM menu
 * Keyboard
 * Works
+
+## Amiga
+
+### Defender of the Crown
+
+* Installs
+
+### Rocker Ranger
+
+* Installs
+
+### Wings!
+
+* Installs

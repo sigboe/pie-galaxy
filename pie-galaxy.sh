@@ -4,18 +4,44 @@
 # https://github.com/sigboe/pie-galaxy/blob/master/LICENSE
 # shellcheck disable=SC2094 # Dirty hack avoid runcommand to steal stdout
 
+#Default settings don't edit as they will be overwritten when you update the program
+#set prefrences in ~/.config/piegalaxy/piegalaxy.conf
 title="Pie Galaxy"
-tmpdir="${HOME}/tmp/piegalaxy"
+tmpdir="${HOME}/.cache/piegalaxy"
+downdir="${HOME}/Downloads"
 romdir="${HOME}/RetroPie/roms"
 dosboxdir="${romdir}/pc/gog"
 scummvmdir="${romdir}/scummvm"
+biosdir="${HOME}/RetroPie/BIOS"
 scriptdir="$(dirname "$(readlink -f "${0}")")"
 wyvernbin="${scriptdir}/wyvern"
 innobin="${scriptdir}/innoextract"
 exceptions="${scriptdir}/exceptions"
 renderhtml="html2text"
-exceptionList="" #empty var, this will be overrwritten at runime
+retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
+configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 version="0.1"
+
+if [[ -n "${XDG_CACHE_HOME}" ]]; then
+	tmpdir="${XDG_CACHE_HOME}/piegalaxy"
+fi
+
+if [[ -n "${XDG_CONFIG_HOME}" ]]; then
+	configfile="${XDG_CONFIG_HOME}/piegalaxy/piegalaxy.conf"
+fi
+
+if [[ -f "${configfile}" ]]; then
+	if grep -E -q -v '^#|^[^ ]*=[^;]*' "{$configfile}"; then
+		echo "Config file is unclean, cleaning it..." >&2
+		mv "${configfile}" "$(dirname "${configfile}")/dirty.conf" 
+		grep -E '^#|^[^ ]*=[^;&]*'  "$(dirname "${configfile}")/dirty.conf"  > "${configfile}"
+	fi
+	# shellcheck source=/dev/null
+	source "${configfile}"
+fi
+
+# shellcheck source=exceptions
+source "${exceptions}"
 
 _depends() {
 	if ! [[ -x "$(command -v dialog)" ]]; then
@@ -108,9 +134,9 @@ _Download() {
 		_msgbox "No game selected, please use one from your library."
 		return
 	else
-		mkdir -p "${tmpdir}"
-		cd "${tmpdir}/" || _exit 1
-		"${wyvernbin}" down --id "${selectedGame}" --force-windows >"$(tty)" || { _error "download failed"; return; }
+		mkdir -p "${downdir}"
+		cd "${downdir}/" || _exit "Could not interact with download directory" 1
+		"${wyvernbin}" down --id "${selectedGame}" --force-windows || { _error "download failed"; return; }
 		_msgbox "${gameName} finished downloading."
 	fi
 
@@ -133,8 +159,8 @@ _Sync() {
 }
 
 _Install() {
-	local fileSelected setupInfo gameName gameID match type shortName
-	fileSelected=$(_fselect "${tmpdir}")
+	local fileSelected setupInfo gameName gameID type shortName
+	fileSelected=$(_fselect "${downdir}")
 
 	if ! [[ -f "${fileSelected}" ]]; then
 		_msgbox "No file was selected."
@@ -171,16 +197,14 @@ _Install() {
 		#Sanitize game name
 		gameName=$(echo "${gameName}" | sed -e 's:™::g' -e 's:  *: :g' )
 
-		# shellcheck source=/dev/null
-		source "${exceptions}"
-		match=$(echo "${exceptionList[@]:0}" | grep -o "${gameID}")
-		if [[ -n "${match}" ]]; then
-			_extract
+		_extract
+
+		if type "${gameID}_exception" &> /dev/null; then
 			"${gameID}_exception"
 			return
-		else
-			_extract
-			[[ -d "${tmpdir}/${gameName}" ]] || return
+		elif [[ ! -d "${tmpdir}/${gameName}" ]]; then
+			_error "Extraction did not succeed"
+			return
 		fi
 
 		type=$(_getType "${gameName}")
@@ -188,7 +212,7 @@ _Install() {
 		if [[ "$type" == "dosbox" ]]; then
 			mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}" || { _error "Unable to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."; return; }
 			cd "${romdir}/pc" || _error "unable to access ${romdir}/pc\nFailed to create launcher."
-			ln -s "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || _error "Failed to create launcher."
+			ln -sf "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || _error "Failed to create launcher."
 			_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
 		elif [[ "$type" == "scummvm" ]]; then
 			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
@@ -250,7 +274,7 @@ _msgbox() {
 		--backtitle "${title}" \
 		"${opts[@]}" \
 		--msgbox "${msg}" \
-		22 77 >"$(tty)" <"$(tty)"
+		22 77  <"$(tty)"
 }
 
 _yesno() {
@@ -302,16 +326,16 @@ _error() {
 }
 
 _joy2key() {
-	if [[ -f "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh" ]]; then
+	if [[ -f "${retropiehelper}" ]]; then
 		local scriptdir="/home/pi/RetroPie-Setup"
 		# shellcheck source=/dev/null
-		source "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
+		source "${retropiehelper}"
 		joy2keyStart
 	fi
 }
 _exit() {
 	clear
-	if [[ -f "${HOME}/RetroPie-Setup/scriptmodules/helpers.sh" ]]; then
+	if [[ -f "${retropiehelper}" ]]; then
 		joy2keyStop
 	fi
 	exit "${1:-0}"
