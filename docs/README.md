@@ -37,7 +37,6 @@ Summary:
 
 ### Soon
 
-* Amiga games
 * NEO-GEO games
 * More Native games
 
