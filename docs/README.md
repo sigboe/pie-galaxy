@@ -1,3 +1,5 @@
+<img src="resources/logo.png" align="right" />
+
 # Pie Galaxy
 
 A GOG client for RetroPie and other GNU/Linux distributions. It uses [Wyvern](https://github.com/nicohman/wyvern/) to download and [Innoextract](https://github.com/dscharrer/innoextract) to extract games. Pie Galaxy also provides a user interface navigable by game controllers and will install games in such a way that it will use native runtimes. It also uses Wyvern to let you claim games available from [GOG Connect](https://gog.com/connect).
