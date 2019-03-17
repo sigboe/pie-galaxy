@@ -33,8 +33,8 @@ fi
 if [[ -f "${configfile}" ]]; then
 	if grep -E -q -v '^#|^[^ ]*=[^;]*' "{$configfile}"; then
 		echo "Config file is unclean, cleaning it..." >&2
-		mv "${configfile}" "$(dirname "${configfile}")/dirty.conf" 
-		grep -E '^#|^[^ ]*=[^;&]*'  "$(dirname "${configfile}")/dirty.conf"  > "${configfile}"
+		mv "${configfile}" "$(dirname "${configfile}")/dirty.conf"
+		grep -E '^#|^[^ ]*=[^;&]*' "$(dirname "${configfile}")/dirty.conf" >"${configfile}"
 	fi
 	# shellcheck source=/dev/null
 	source "${configfile}"
@@ -136,7 +136,10 @@ _Download() {
 	else
 		mkdir -p "${downdir}"
 		cd "${downdir}/" || _exit "Could not interact with download directory" 1
-		"${wyvernbin}" down --id "${selectedGame}" --force-windows || { _error "download failed"; return; }
+		"${wyvernbin}" down --id "${selectedGame}" --windows-auto || {
+			_error "download failed"
+			return
+		}
 		_msgbox "${gameName} finished downloading."
 	fi
 
@@ -159,91 +162,140 @@ _Sync() {
 }
 
 _Install() {
-	local fileSelected setupInfo gameName gameID type shortName
+	local fileSelected setupInfo gameName gameID type shortName extension
 	fileSelected=$(_fselect "${downdir}")
+	extension="${fileSelected##*.}"
 
 	if ! [[ -f "${fileSelected}" ]]; then
-		_msgbox "No file was selected."
-	else
+		_error "No file was selected."
+		return
+	elif [[ "${extension,,}" != "exe" && "${extension,,}" != "sh" ]]; then
+		_error "File extension not supported. Supported extensions are exe or sh."
+		return
+	elif [[ "${extension,,}" == "exe" ]]; then
+		setupInfo="$("${innobin}" --gog-game-id "${fileSelected}")"
+		gameName="$(echo "${setupInfo}" |& awk -F'"' '{print $2}')"
+		gameID="$("${innobin}" -s --gog-game-id "${fileSelected}")"
+	elif [[ "${extension,,}" == "sh" ]]; then
+		gameName="$(grep -a -m 1 "label=" "${fileSelected}" |& awk -F'"' '{print $2}' | sed 's: (GOG.com)::')"
+		setupInfo="Can't read info from .sh files yet."
+		gameID="0"
+	fi
 
-		setupInfo=$("${innobin}" --gog-game-id "${fileSelected}")
-		gameName=$(echo "${setupInfo}" |& awk -F'"' '{print $2}')
-		gameID=$("${innobin}" -s --gog-game-id "${fileSelected}")
+	_yesno "${setupInfo}" --title "${gameName}" --extra-button --extra-label "Delete" --ok-label "Install"
 
-		_yesno "${setupInfo#"Inspecting "}" --title "${gameName}" --extra-button --extra-label "Delete" --ok-label "Install"
-
-		case $? in
-			1|255)
-				# cancel or esc
-				return;;
-			3)
-				#delete
-				rm "${fileSelected}" || { _error "unable to delete file"; return; }
-				_msgbox "${fileSelected} deleted."
-				return;;
-		esac
-
-		# If the setup.exe doesn't have the gameID try to fetch it from the gameName and the library.
-		[[ -z "${gameID}" ]] && gameID=$(echo "${wyvernls}" | jq --raw-output --arg var "${gameName}" '.games[] | .ProductInfo | select(.title==$var) | .id')
-
-		if [[ -z "${gameID}" ]]; then
-			# If setup.exe still doesn't contain gameID, try guessing the slug, and fetchign the ID that way.
-			gameSlug=$(echo "${gameName// /_}" | tr '[:upper:]' '[:lower:]')
-			gameID=$(echo "${wyvernls}" | jq --raw-output --arg var "${gameSlug}" '.games[] | .ProductInfo | select(.slug==$var) | .id')
-		fi
-
-		[[ -z "${gameID}" ]] && { _error "Can't figure out the Game ID. Aborting installation."; return; }
-
-		#Sanitize game name
-		gameName=$(echo "${gameName}" | sed -e 's:™::g' -e 's:  *: :g' )
-
-		_extract
-
-		if type "${gameID}_exception" &> /dev/null; then
-			"${gameID}_exception"
+	case $? in
+	1 | 255)
+		# cancel or esc
+		return
+		;;
+	3)
+		#delete
+		rm "${fileSelected}" || {
+			_error "unable to delete file"
 			return
-		elif [[ ! -d "${tmpdir}/${gameName}" ]]; then
-			_error "Extraction did not succeed"
+		}
+		_msgbox "${fileSelected} deleted."
+		return
+		;;
+	esac
+
+	# If the setup.exe doesn't have the gameID try to fetch it from the gameName and the library.
+	[[ -z "${gameID}" ]] && gameID=$(echo "${wyvernls}" | jq --raw-output --arg var "${gameName}" '.games[] | .ProductInfo | select(.title==$var) | .id')
+
+	if [[ -z "${gameID}" ]]; then
+		# If setup.exe still doesn't contain gameID, try guessing the slug, and fetchign the ID that way.
+		gameSlug=$(echo "${gameName// /_}" | tr '[:upper:]' '[:lower:]')
+		gameID=$(echo "${wyvernls}" | jq --raw-output --arg var "${gameSlug}" '.games[] | .ProductInfo | select(.slug==$var) | .id')
+	fi
+
+	[[ -z "${gameID}" ]] && {
+		_error "Can't figure out the Game ID. Aborting installation."
+		return
+	}
+
+	#Sanitize game name
+	gameName=$(echo "${gameName}" | sed -e 's:™::g' -e 's:  *: :g')
+
+	_extract "${extension}"
+
+	if type "${gameID}_exception" &>/dev/null; then
+		"${gameID}_exception"
+		return
+	elif [[ ! -d "${tmpdir}/${gameName}" ]]; then
+		_error "Extraction did not succeed"
+		return
+	fi
+
+	type=$(_getType "${gameName}")
+
+	if [[ "${type}" == "dosbox" ]]; then
+		mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}" || {
+			_error "Unable to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."
 			return
-		fi
-
-		type=$(_getType "${gameName}")
-
-		if [[ "$type" == "dosbox" ]]; then
-			mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}" || { _error "Unable to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."; return; }
-			cd "${romdir}/pc" || _error "unable to access ${romdir}/pc\nFailed to create launcher."
-			ln -sf "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || _error "Failed to create launcher."
+		}
+		cd "${romdir}/pc" || _error "unable to access ${romdir}/pc\nFailed to create launcher."
+		ln -sf "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || _error "Failed to create launcher."
+		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
+	elif [[ "${type}" == "scummvm" ]]; then
+		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
+		mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || {
+			_error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
+			return
+		}
+		echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
+		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${scummvmdir}\n\nTo finish the installation and open ScummVM and add game, or install lr-scummvm." --title "${gameName} was installed."
+	elif [[ "${type}" == "neogeo" ]]; then
+		if [[ "$(find "${tmpdir}/${gameName}" -name '*.zip' ! -name 'neogeo.zip' | wc -l)" == "1" ]]; then
+			cp "${tmpdir}/${gameName}/game/neogeo.zip" "${romdir}/neogeo/"
+			cp "$(find "${tmpdir}/${gameName}" -name '*.zip' ! -name 'neogeo.zip')" "${romdir}/neogeo/"
 			_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
-		elif [[ "$type" == "scummvm" ]]; then
-			shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
-			mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || { _error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."; return; }
-			echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
-			_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${scummvmdir}\n\nTo finish the installation and open ScummVM and add game, or install lr-scummvm." --title "${gameName} was installed."
-		elif [[ "$type" == "unsupported" ]]; then
-			_error "${fileSelected} apperantly is unsupported."
+		else
+			_error "Game not supported yet."
 			return
 		fi
-
+	elif [[ "${type}" == "unsupported" ]]; then
+		_error "${fileSelected} apperantly is unsupported."
+		return
 	fi
 
 }
 
 _extract() {
-	#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
-	local folder
-	rm -rf "${tmpdir:?}/output" #clean the extract path (is this okay to do like this?)
-	rm -rf "${tmpdir:?}/${gameName}" #also cleanup where to move the files
-	mkdir -p "${tmpdir}/output" | { _error "Could not initialize temp folder for extraction"; return; } 
-	"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)"
-	folder=$(dirname "$(find "${tmpdir}/output" -name 'goggame-*.info')")
-	if [[ "${folder}" == "." ]]; then
-		# Didn't find goggame-*.info, now we must rely on exception to catch this install.
-		folder="${tmpdir}/output/app"
+
+	if [[ "${1,,}" == "exe" ]]; then
+		#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
+		local folder
+		rm -rf "${tmpdir:?}/output"
+		rm -rf "${tmpdir:?}/${gameName}"
+		mkdir -p "${tmpdir}/output" | {
+			_error "Could not initialize temp folder for extraction"
+			return
+		}
+		"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)"
+		folder=$(dirname "$(find "${tmpdir}/output" -name 'goggame-*.info')")
+		if [[ "${folder}" == "." ]]; then
+			# Didn't find goggame-*.info, now we must rely on exception to catch this install.
+			folder="${tmpdir}/output/app"
+		fi
+		if [[ -n "$(ls -A "${folder}/__support/app")" ]]; then
+			cp -r "${folder}"/__support/app/* "${folder}/"
+		fi
+		mv "${folder}" "${tmpdir}/${gameName}"
+	elif [[ "${1,,}" == "sh" ]]; then
+		rm -rf "${tmpdir:?}/output"
+		rm -rf "${tmpdir:?}/${gameName}"
+		mkdir -p "${tmpdir}/output" | {
+			_error "Could not initialize temp folder for extraction"
+			return
+		}
+		unzip "${fileSelected}" -d "${tmpdir}/output"
+		folder="${tmpdir}/output/data/noarch"
+		mv "${folder}" "${tmpdir}/${gameName}"
+	else
+		_error "File extension not supported."
 	fi
-	if [[ -n "$(ls -A "${folder}/__support/app")" ]]; then
-		cp -r "${folder}"/__support/app/* "${folder}/"
-	fi
-	mv "${folder}" "${tmpdir}/${gameName}"
+
 }
 
 _getType() {
@@ -251,12 +303,11 @@ _getType() {
 	local gamePath type
 	gamePath=$(cat "${tmpdir}/${1}/"goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
 
-	if [[ "${gamePath}" == *"DOSBOX"* ]] || [[ -d "${tmpdir}/${1}/DOSBOX" ]]; then
+	if [[ "${gamePath}" == *"DOSBOX"* ]] || [[ -d "${tmpdir}/${1}/DOSBOX" ]] || [[ -d "${tmpdir}/${1}/dosbox" ]]; then
 		type="dosbox"
-	elif [[ "${gamePath}" == *"scummvm"* ]]; then
+	elif [[ "${gamePath}" == *"scummvm"* ]] || [[ -d "${tmpdir}/${1}/scummvm" ]]; then
 		type="scummvm"
-	elif [[ "${gamePath}" == *"neogeo"* ]]; then
-		# Surly this wont work, but its a placeholder
+	elif [[ $(find "${tmpdir}/${1}" -name "neogeo.zip") ]]; then
 		type="neogeo"
 	else
 		_error "Didn't find what game it was.\nNot installing."
@@ -274,7 +325,7 @@ _msgbox() {
 		--backtitle "${title}" \
 		"${opts[@]}" \
 		--msgbox "${msg}" \
-		22 77  <"$(tty)"
+		22 77 <"$(tty)"
 }
 
 _yesno() {
@@ -292,7 +343,7 @@ _yesno() {
 _fselect() {
 	local termh windowh dirlist selected
 	termh=$(tput lines)
-	(( windowh = "${termh}" - 10 ))
+	((windowh = "${termh}" - 10))
 	[[ "${windowh}" -gt "22" ]] && windowh="22"
 	if [[ "${windowh}" -ge "8" ]]; then
 		dialog \
@@ -303,8 +354,8 @@ _fselect() {
 		# in case of a very tiny terminal window
 		# make an array of the filenames and put them into --menu instead
 		while read -r filename; do
-			dirlist+=( "$(basename "${filename}")" )
-			dirlist+=( "$("${innobin}" --gog-game-id "${filename}" |& awk -F'"' '{print $2}' )" )
+			dirlist+=("$(basename "${filename}")")
+			dirlist+=("$("${innobin}" --gog-game-id "${filename}" |& awk -F'"' '{print $2}')")
 
 		done < <(find "${1}" -maxdepth 1 -type f)
 		selected=$(dialog \
@@ -345,6 +396,9 @@ _joy2key
 _depends
 _checklogin
 
-while true; do main; "_${selected:-exit}"; done
+while true; do
+	main
+	"_${selected:-exit}"
+done
 
 _exit

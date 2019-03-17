@@ -30,6 +30,7 @@ Summary:
   * Escape from Monkey Island
 * Amiga games
   * may have some issues still
+* NEO-GEO games
 * Native games
   * Ultimate DOOM, The
 
@@ -37,7 +38,6 @@ Summary:
 
 ### Soon
 
-* NEO-GEO games
 * More Native games
 
 ### Furture
