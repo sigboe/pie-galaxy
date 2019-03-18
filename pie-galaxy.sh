@@ -22,6 +22,9 @@ retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 version="0.2"
 
+export LC_ALL=C.UTF-8
+export LANGUAGE=C.UTF-8
+
 if [[ -n "${XDG_CACHE_HOME}" ]]; then
 	tmpdir="${XDG_CACHE_HOME}/piegalaxy"
 fi
