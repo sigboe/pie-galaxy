@@ -22,11 +22,6 @@ Open up the ScummVM GUI and add the game. The shortcut in EmulationStation shoul
 
 Yes, if you get the lr-scummvm instead, it you get improvements like better gamepad support, and you don't need to add games in the GUI after you install them.
 
-## There symbols displayed like ~D in my game list
-
-This is due to RetroPie not being configured to use UTF-8. Looking into different ways to handle this.
-If you want you can set the variables LC_ALL and LANGUAGE in your .bashrc file, but a program like this should not do such a thing for you.
-
 ## There is no progress bar while downloading
 
 This bug is only on RetroPie, looking into it.
