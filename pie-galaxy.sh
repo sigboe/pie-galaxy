@@ -22,6 +22,7 @@ retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 version="0.2"
 
+# fix UTF-8 symbols like © or ™
 export LC_ALL=C.UTF-8
 export LANGUAGE=C.UTF-8
 
@@ -138,8 +139,7 @@ _Download() {
 		return
 	else
 		mkdir -p "${downdir}"
-		cd "${downdir}/" || _exit "Could not interact with download directory" 1
-		"${wyvernbin}" down --id "${selectedGame}" --windows-auto || {
+		"${wyvernbin}" down --id "${selectedGame}" --windows-auto --output "${downdir}/" 3>&1 1>&2 2>&3 >"$(tty)" || {
 			_error "download failed"
 			return
 		}
@@ -168,12 +168,14 @@ _Install() {
 	local fileSelected setupInfo gameName gameID type shortName extension
 	fileSelected=$(_fselect "${downdir}")
 	extension="${fileSelected##*.}"
+	fileSize="$(du -h "${fileSelected}" | cut -f1)"
 
 	if ! [[ -f "${fileSelected}" ]]; then
 		_error "No file was selected."
 		return
 	elif [[ "${extension,,}" != "exe" && "${extension,,}" != "sh" ]]; then
-		_error "File extension not supported. Supported extensions are exe or sh."
+		_error "$(basename "${fileSelected}")\n${fileSize}\n\nFile extension ${extension} not supported. Supported extensions are exe or sh." --extra-button --extra-label "Delete"
+		if [[ "${?}" == "3" ]]; then rm "${fileSelected}"; fi
 		return
 	elif [[ "${extension,,}" == "exe" ]]; then
 		setupInfo="$("${innobin}" --gog-game-id "${fileSelected}")"
@@ -286,7 +288,7 @@ _extract() {
 			_error "Could not initialize temp folder for extraction"
 			return
 		}
-		"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" >"$(tty)" <"$(tty)"
+		"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output"
 		folder=$(dirname "$(find "${tmpdir}/output" -name 'goggame-*.info')")
 		if [[ "${folder}" == "." ]]; then
 			# Didn't find goggame-*.info, now we must rely on exception to catch this install.
@@ -331,29 +333,6 @@ _getType() {
 	echo "${type:-unsupported}"
 }
 
-_msgbox() {
-	local msg="${1}"
-	shift
-	local opts=("${@}")
-	dialog \
-		--backtitle "${title}" \
-		"${opts[@]}" \
-		--msgbox "${msg}" \
-		22 77 <"$(tty)"
-}
-
-_yesno() {
-	local msg="${1}"
-	shift
-	local opts=("${@}")
-	dialog \
-		--backtitle "${title}" \
-		"${opts[@]}" \
-		--yesno "${msg}" \
-		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
-	return ${?}
-}
-
 _fselect() {
 	local termh windowh dirlist selected
 	termh=$(tput lines)
@@ -381,13 +360,45 @@ _fselect() {
 
 }
 
+_msgbox() {
+	local msg opts
+	msg="${1}"
+	shift
+	opts=("${@}")
+	dialog \
+		--backtitle "${title}" \
+		"${opts[@]}" \
+		--msgbox "${msg}" \
+		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
+}
+
+_yesno() {
+	local msg opts
+	msg="${1}"
+	shift
+	opts=("${@}")
+	dialog \
+		--backtitle "${title}" \
+		"${opts[@]}" \
+		--yesno "${msg}" \
+		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
+	return ${?}
+}
+
 _error() {
+	local msg opts answer
+	msg="${1}"
+	shift
+	opts=("${@}")
 	dialog \
 		--backtitle "${title}" \
 		--title "ERROR:" \
-		--msgbox "${1}" \
+		"${opts[@]}" \
+		--msgbox "${msg}" \
 		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
+		answer="${?}"
 	[[ "${2}" =~ ^[0-9]+$ ]] && _exit "${2}"
+	return "${answer}"
 }
 
 _joy2key() {
