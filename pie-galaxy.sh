@@ -81,7 +81,7 @@ main() {
 		--backtitle "${title}" \
 		--cancel-label "Exit" \
 		--menu "Choose one" \
-		22 77 16 "${menuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
+		22 77 16 "${menuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)")
 
 }
 
@@ -100,6 +100,9 @@ _Library() {
 
 }
 
+# Displays the description of a game
+# Checks if game is dosbox or scummvm by curling the store page
+# usage _description "${gameID}"
 _description() {
 	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .title')
 	gameDescription="$(curl -s "http://api.gog.com/products/${1}?expand=description" | jq --raw-output '.description | .full' | "${renderhtml[@]}")"
@@ -115,12 +118,12 @@ _description() {
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by ScummVM" "${gameDescription}"
 	fi
 
-	_msgbox "${gameDescription}" --ok-label "Select"
+	_msgbox "${gameDescription}" --title "${gameName}" --ok-label "Select"
 
 }
 
 _Connect() {
-	availableGames=$("${wyvernbin}" connect ls 2>&1 >"$(tty)")
+	availableGames=$("${wyvernbin}" connect ls 2>&1)
 
 	if _yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?"; then
 		"${wyvernbin}" connect claim
@@ -286,7 +289,7 @@ _extract() {
 		#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 		local folder
 		rm -rf "${tmpdir:?}/output"
-	if [[ "${extension,,}" == "exe" ]]; then
+		rm -rf "${tmpdir:?}/${gameName}"
 		mkdir -p "${tmpdir}/output" | {
 			_error "Could not initialize temp folder for extraction"
 			return
@@ -301,7 +304,7 @@ _extract() {
 			cp -r "${folder}"/__support/app/* "${folder}/"
 		fi
 		mv "${folder}" "${tmpdir}/${gameName}"
-	elif [[ "${1,,}" == "sh" ]]; then
+	elif [[ "${extension,,}" == "sh" ]]; then
 		rm -rf "${tmpdir:?}/output"
 		rm -rf "${tmpdir:?}/${gameName}"
 		mkdir -p "${tmpdir}/output" | {
@@ -317,12 +320,12 @@ _extract() {
 
 }
 
-_getType() {
-
-	local gamePath type
 # Detect the game type
 # Usage: _getType "${gameName}"
 # returns dosbox, scummvm or neogeo
+_getType() {
+
+	local gamePath type
 	gamePath=$(cat "${tmpdir}/${1}/"goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
 
 	if [[ "${gamePath}" == *"DOSBOX"* ]] || [[ -d "${tmpdir}/${1}/DOSBOX" ]] || [[ -d "${tmpdir}/${1}/dosbox" ]]; then
@@ -354,7 +357,7 @@ _fselect() {
 		dialog \
 			--backtitle "${title}" \
 			--fselect "${1}/" \
-			"${windowh}" 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
+			"${windowh}" 77 3>&1 1>&2 2>&3 >"$(tty)"
 	else
 		# in case of a very tiny terminal window
 		# make an array of the filenames and put them into --menu instead
@@ -406,17 +409,17 @@ _yesno() {
 	return ${?}
 }
 
-_error() {
-	local msg opts answer exitcode
-	msg="${1}"
-	shift
-	[[ "${1}" =~ ^[0-9]+$ ]] && exitcode="${1}"
 # Display an error
 # Usage: _error "My error" [1] [--optional-arguments]
 # If the second argument is a number, the program will exit with that number as an exit code.
 # You can pass additioal arguments to the dialog program
 # Backtitle and title are already set
 # Returns the exit code of the dialog program
+_error() {
+	local msg opts answer exitcode
+	msg="${1}"
+	shift
+	[[ "${1}" =~ ^[0-9]+$ ]] && exitcode="${1}"
 	shift
 	opts=("${@}")
 	dialog \
