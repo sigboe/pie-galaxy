@@ -386,8 +386,10 @@ _yesno() {
 }
 
 _error() {
-	local msg opts answer
+	local msg opts answer exitcode
 	msg="${1}"
+	shift
+	[[ "${1}" =~ ^[0-9]+$ ]] && exitcode="${1}"
 	shift
 	opts=("${@}")
 	dialog \
@@ -397,7 +399,7 @@ _error() {
 		--msgbox "${msg}" \
 		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
 		answer="${?}"
-	[[ "${2}" =~ ^[0-9]+$ ]] && _exit "${2}"
+	[[ -n "${exitcode}" ]] && _exit "${exitcode}"
 	return "${answer}"
 }
 
