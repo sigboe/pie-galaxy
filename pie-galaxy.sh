@@ -274,7 +274,7 @@ _msgbox() {
 		--backtitle "${title}" \
 		"${opts[@]}" \
 		--msgbox "${msg}" \
-		22 77  <"$(tty)"
+		22 77  3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
 }
 
 _yesno() {
