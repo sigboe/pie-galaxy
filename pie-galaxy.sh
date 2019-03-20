@@ -17,7 +17,7 @@ scriptdir="$(dirname "$(readlink -f "${0}")")"
 wyvernbin="${scriptdir}/wyvern"
 innobin="${scriptdir}/innoextract"
 exceptions="${scriptdir}/exceptions"
-renderhtml="html2text"
+renderhtml=( html2text -width 999 -style pretty )
 retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 version="0.2"
@@ -62,8 +62,8 @@ _depends() {
 	if ! [[ -x "$(command -v jq)" ]]; then
 		_error "jq not installed." 1
 	fi
-	if ! [[ -x "$(command -v html2text)" ]]; then
-		renderhtml="sed s:\<br\>:\\n:g"
+	if ! [[ -x "$(command -v "${renderhtml[0]}")" ]]; then
+		renderhtml=( sed 's:\<br\>:\\n:g' )
 	fi
 }
 
@@ -102,21 +102,17 @@ _Library() {
 
 _description() {
 	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .title')
-	gameDescription=$(curl -s "http://api.gog.com/products/${1}?expand=description" | jq --raw-output '.description | .full' | $renderhtml)
+	gameDescription="$(curl -s "http://api.gog.com/products/${1}?expand=description" | jq --raw-output '.description | .full' | "${renderhtml[@]}")"
 
 	local url page
 	url="$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .url')"
 	page="$(curl -s "https://www.gog.com${url}")"
 
 	if echo "${page}" | grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox"; then
-		gameDescription="This game is powered by DOSBox\n\n${gameDescription}"
+		printf -v gameDescription '%s\n\n%s\n' "This game is powered by DOSBox" "${gameDescription}"
 
 	elif echo "${page}" | grep -q "This game is powered by <a href=http://scummvm.org>ScummVM"; then
-		gameDescription="This game is powered by ScummVM\n\n${gameDescription}"
-
-	else
-		gameDescription="${gameDescription}"
-
+		printf -v gameDescription '%s\n\n%s\n' "This game is powered by ScummVM" "${gameDescription}"
 	fi
 
 	_msgbox "${gameDescription}" --ok-label "Select"
