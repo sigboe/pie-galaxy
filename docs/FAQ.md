@@ -22,10 +22,6 @@ Open up the ScummVM GUI and add the game. The shortcut in EmulationStation shoul
 
 Yes, if you get the lr-scummvm instead, it you get improvements like better gamepad support, and you don't need to add games in the GUI after you install them.
 
-## There is no progress bar while downloading
-
-This bug is only on RetroPie, looking into it.
-
 ## There is a `not a tty` file
 
 Known bug, its harmless. I will fix it, its just not a top priority bug.
