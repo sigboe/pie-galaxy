@@ -419,8 +419,7 @@ _error() {
 	local msg opts answer exitcode
 	msg="${1}"
 	shift
-	[[ "${1}" =~ ^[0-9]+$ ]] && exitcode="${1}"
-	shift
+	[[ "${1}" =~ ^[0-9]+$ ]] && exitcode="${1}" && shift
 	opts=("${@}")
 	dialog \
 		--backtitle "${title}" \
