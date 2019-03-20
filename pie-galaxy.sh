@@ -317,6 +317,9 @@ _extract() {
 _getType() {
 
 	local gamePath type
+# Detect the game type
+# Usage: _getType "${gameName}"
+# returns dosbox, scummvm or neogeo
 	gamePath=$(cat "${tmpdir}/${1}/"goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
 
 	if [[ "${gamePath}" == *"DOSBOX"* ]] || [[ -d "${tmpdir}/${1}/DOSBOX" ]] || [[ -d "${tmpdir}/${1}/dosbox" ]]; then
@@ -333,6 +336,12 @@ _getType() {
 	echo "${type:-unsupported}"
 }
 
+# dialog --fselect broken out to a function,
+# the purpouse is that 
+# if the screen is smaller then what --fselec can handle
+# I can do somethig else
+# Usage: _fselect "${fullpath}"
+# returns the file that is selected including the full path, if full path is used.
 _fselect() {
 	local termh windowh dirlist selected
 	termh=$(tput lines)
@@ -360,6 +369,10 @@ _fselect() {
 
 }
 
+# Display a message
+# Usage: _msgbox "My message" [--optional-arguments]
+# You can pass additioal arguments to the dialog program
+# Backtitle is already set
 _msgbox() {
 	local msg opts
 	msg="${1}"
@@ -372,6 +385,11 @@ _msgbox() {
 		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
 }
 
+# Request user input
+# Usage: _yesno "My question" [--optional-arguments]
+# You can pass additioal arguments to the dialog program
+# Backtitle is already set
+# returns the exit code from dialog which depends on the user answer
 _yesno() {
 	local msg opts
 	msg="${1}"
@@ -390,6 +408,12 @@ _error() {
 	msg="${1}"
 	shift
 	[[ "${1}" =~ ^[0-9]+$ ]] && exitcode="${1}"
+# Display an error
+# Usage: _error "My error" [1] [--optional-arguments]
+# If the second argument is a number, the program will exit with that number as an exit code.
+# You can pass additioal arguments to the dialog program
+# Backtitle and title are already set
+# Returns the exit code of the dialog program
 	shift
 	opts=("${@}")
 	dialog \
@@ -403,6 +427,10 @@ _error() {
 	return "${answer}"
 }
 
+# Checks if retropie helper script exists
+# sources it
+# and enable joy2key for gamepad input
+# Usage: _joy2key
 _joy2key() {
 	if [[ -f "${retropiehelper}" ]]; then
 		local scriptdir="/home/pi/RetroPie-Setup"
@@ -411,6 +439,10 @@ _joy2key() {
 		joy2keyStart
 	fi
 }
+
+# Exits the program
+# it also clears
+# it also does turns off joy2key if the retropie helper script exists
 _exit() {
 	clear
 	if [[ -f "${retropiehelper}" ]]; then
