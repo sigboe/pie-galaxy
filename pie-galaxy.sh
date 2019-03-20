@@ -135,7 +135,7 @@ _Download() {
 		return
 	else
 		mkdir -p "${downdir}"
-		"${wyvernbin}" down --id "${selectedGame}" --windows-auto --output "${downdir}/" 3>&1 1>&2 2>&3 >"$(tty)" || {
+		"${wyvernbin}" down --id "${selectedGame}" --windows-auto --output "${downdir}/" &>"$(tty)" || {
 			_error "download failed"
 			return
 		}
