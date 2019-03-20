@@ -218,7 +218,7 @@ _Install() {
 	#Sanitize game name
 	gameName=$(echo "${gameName}" | sed -e 's:™::g' -e 's:  *: :g')
 
-	_extract "${extension}"
+	_extract "${fileSelected}" "${gameName}"
 
 	if type "${gameID}_exception" &>/dev/null; then
 		"${gameID}_exception"
@@ -274,12 +274,16 @@ _Install() {
 }
 
 _extract() {
+	local fileSelected extension gameName
+	fileSelected="${1}"
+	gameName="${2}"
+	extension="${fileSelected##*.}"
 
-	if [[ "${1,,}" == "exe" ]]; then
+	if [[ "${extension,,}" == "exe" ]]; then
 		#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 		local folder
 		rm -rf "${tmpdir:?}/output"
-		rm -rf "${tmpdir:?}/${gameName}"
+	if [[ "${extension,,}" == "exe" ]]; then
 		mkdir -p "${tmpdir}/output" | {
 			_error "Could not initialize temp folder for extraction"
 			return
