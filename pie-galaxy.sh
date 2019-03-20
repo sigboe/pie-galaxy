@@ -273,6 +273,9 @@ _Install() {
 
 }
 
+# Extracts a setup file
+# Usage: _extract "${fileName}" "${gameName}"
+# extracts "${filename}" and moves game to "${tmpdir}/${gameName}"
 _extract() {
 	local fileSelected extension gameName
 	fileSelected="${1}"
