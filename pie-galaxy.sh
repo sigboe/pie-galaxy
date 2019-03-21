@@ -53,15 +53,19 @@ _depends() {
 		sleep 10
 		_exit 1
 	fi
+
 	if ! [[ -x "${wyvernbin}" ]]; then
 		_error "Wyvern not installed." 1
 	fi
+
 	if ! [[ -x "${innobin}" ]]; then
 		_error "innoextract not installed." 1
 	fi
+
 	if ! [[ -x "$(command -v jq)" ]]; then
 		_error "jq not installed." 1
 	fi
+
 	if ! [[ -x "$(command -v "${renderhtml[0]}")" ]]; then
 		renderhtml=( sed 's:\<br\>:\\n:g' )
 	fi
@@ -136,6 +140,7 @@ _Download() {
 	if [[ -z ${selectedGame} ]]; then
 		_msgbox "No game selected, please use one from your library."
 		return
+
 	else
 		mkdir -p "${downdir}"
 		"${wyvernbin}" down --id "${selectedGame}" --windows-auto --output "${downdir}/" &>"$(tty)" || {
@@ -150,6 +155,7 @@ _Download() {
 _checklogin() {
 	if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
 		wyvernls=$(timeout 30 "${wyvernbin}" ls --json) || _error "It took longer than 30 seconds. You may need to log in again.\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
+
 	else
 		_error "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
 	fi
@@ -186,14 +192,17 @@ _Install() {
 	if ! [[ -f "${fileSelected}" ]]; then
 		_error "No file was selected."
 		return
+
 	elif [[ "${extension,,}" != "exe" && "${extension,,}" != "sh" ]]; then
 		_error "$(basename "${fileSelected}")\n${fileSize}\n\nFile extension ${extension} not supported. Supported extensions are exe or sh." --extra-button --extra-label "Delete"
 		if [[ "${?}" == "3" ]]; then rm "${fileSelected}"; fi
 		return
+
 	elif [[ "${extension,,}" == "exe" ]]; then
 		setupInfo="$("${innobin}" --gog-game-id "${fileSelected}")"
 		gameName="$(echo "${setupInfo}" |& awk -F'"' '{print $2}')"
 		gameID="$("${innobin}" -s --gog-game-id "${fileSelected}")"
+
 	elif [[ "${extension,,}" == "sh" ]]; then
 		gameName="$(grep -a -m 1 "label=" "${fileSelected}" |& awk -F'"' '{print $2}' | sed 's: (GOG.com)::')"
 		setupInfo="Can't read info from .sh files yet."
@@ -240,6 +249,7 @@ _Install() {
 	if type "${gameID}_exception" &>/dev/null; then
 		"${gameID}_exception"
 		return
+
 	elif [[ ! -d "${tmpdir}/${gameName}" ]]; then
 		_error "Extraction did not succeed"
 		return
@@ -255,6 +265,7 @@ _Install() {
 		cd "${romdir}/pc" || _error "unable to access ${romdir}/pc\nFailed to create launcher."
 		ln -sf "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || _error "Failed to create launcher."
 		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
+
 	elif [[ "${type}" == "scummvm" ]]; then
 		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
 		mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || {
@@ -263,26 +274,32 @@ _Install() {
 		}
 		echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
 		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${scummvmdir}\n\nTo finish the installation and open ScummVM and add game, or install lr-scummvm." --title "${gameName} was installed."
+
 	elif [[ "${type}" == "neogeo" ]]; then
 		if [[ ! -d "${romdir}/neogeo/" ]]; then
 			if _yesno "${romdir}/neogeo/ Does not exist.\n\nDo you want to install lr-fbalpha"; then
 					sudo RetroPie-Setup/retropie_packages.sh lr-fbalpha
 			fi
 		fi
+
 		if [[ -f "${romdir}/neogeo/neogeo.zip" ]]; then
 			if _yesno "neogeo.zip already existsts in ${romdir}/neogeo/\n\nDo you want to overwrite?"; then
 				cp -f "${tmpdir}/${gameName}/game/neogeo.zip" "${romdir}/neogeo/"
 			fi
+
 		else
 			cp "${tmpdir}/${gameName}/game/neogeo.zip" "${romdir}/neogeo/"
 		fi
+
 		if [[ "$(find "${tmpdir}/${gameName}" -name '*.zip' ! -name 'neogeo.zip' | wc -l)" == "1" ]]; then
 			cp "$(find "${tmpdir}/${gameName}" -name '*.zip' ! -name 'neogeo.zip')" "${romdir}/neogeo/"
 			_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
+
 		else
 			_error "Game not supported yet."
 			return
 		fi
+
 	elif [[ "${type}" == "unsupported" ]]; then
 		_error "${fileSelected} apperantly is unsupported."
 		return
@@ -318,6 +335,7 @@ _extract() {
 			cp -r "${folder}"/__support/app/* "${folder}/"
 		fi
 		mv "${folder}" "${tmpdir}/${gameName}"
+
 	elif [[ "${extension,,}" == "sh" ]]; then
 		rm -rf "${tmpdir:?}/output"
 		rm -rf "${tmpdir:?}/${gameName}"
@@ -328,6 +346,7 @@ _extract() {
 		unzip "${fileSelected}" -d "${tmpdir}/output"
 		folder="${tmpdir}/output/data/noarch"
 		mv "${folder}" "${tmpdir}/${gameName}"
+
 	else
 		_error "File extension not supported."
 	fi
@@ -344,10 +363,13 @@ _getType() {
 
 	if [[ "${gamePath}" == *"DOSBOX"* ]] || [[ -d "${tmpdir}/${1}/DOSBOX" ]] || [[ -d "${tmpdir}/${1}/dosbox" ]]; then
 		type="dosbox"
+
 	elif [[ "${gamePath}" == *"scummvm"* ]] || [[ -d "${tmpdir}/${1}/scummvm" ]]; then
 		type="scummvm"
+
 	elif [[ $(find "${tmpdir}/${1}" -name "neogeo.zip") ]]; then
 		type="neogeo"
+
 	else
 		_error "Didn't find what game it was.\nNot installing."
 		return
@@ -372,6 +394,7 @@ _fselect() {
 			--backtitle "${title}" \
 			--fselect "${1}/" \
 			"${windowh}" 77 3>&1 1>&2 2>&3 >"$(tty)"
+
 	else
 		# in case of a very tiny terminal window
 		# make an array of the filenames and put them into --menu instead
