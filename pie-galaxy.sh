@@ -264,7 +264,7 @@ _Install() {
 		echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
 		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${scummvmdir}\n\nTo finish the installation and open ScummVM and add game, or install lr-scummvm." --title "${gameName} was installed."
 	elif [[ "${type}" == "neogeo" ]]; then
-		if [[ -d "${romdir}/neogeo/" ]]; then
+		if [[ ! -d "${romdir}/neogeo/" ]]; then
 			if _yesno "${romdir}/neogeo/ Does not exist.\n\nDo you want to install lr-fbalpha"; then
 					sudo RetroPie-Setup/retropie_packages.sh lr-fbalpha
 			fi
