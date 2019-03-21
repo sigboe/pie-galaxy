@@ -34,6 +34,7 @@ if [[ -n "${XDG_CONFIG_HOME}" ]]; then
 	configfile="${XDG_CONFIG_HOME}/piegalaxy/piegalaxy.conf"
 fi
 
+# Read config file and sanitize input. If you want to change the defaults.
 if [[ -f "${configfile}" ]]; then
 	if grep -E -q -v '^#|^[^ ]*=[^;]*' "{$configfile}"; then
 		echo "Config file is unclean, cleaning it..." >&2
