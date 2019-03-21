@@ -17,7 +17,7 @@ scriptdir="$(dirname "$(readlink -f "${0}")")"
 wyvernbin="${scriptdir}/wyvern"
 innobin="${scriptdir}/innoextract"
 exceptions="${scriptdir}/exceptions"
-renderhtml=( html2text -width 999 -style pretty )
+renderhtml=(html2text -width 999 -style pretty)
 retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 version="0.2"
@@ -68,7 +68,7 @@ _depends() {
 	fi
 
 	if ! [[ -x "$(command -v "${renderhtml[0]}")" ]]; then
-		renderhtml=( sed 's:\<br\>:\\n:g' )
+		renderhtml=(sed 's:\<br\>:\\n:g')
 	fi
 }
 
@@ -169,7 +169,7 @@ _About() {
 	builddate="$(git --git-dir="${scriptdir}/.git" log -1 --date=short --pretty=format:%cd)"
 	wyvernVersion="$(${wyvernbin} --version)"
 	innoVersion="$(${innobin} --version -s)"
-	read -rd '' about << _EOF_
+	read -rd '' about <<_EOF_
 Pie Galaxy ${version}-${gitbranch}-${builddate} + ${githash}
 innoextract ${innoVersion}
 ${wyvernVersion}
@@ -279,7 +279,7 @@ _Install() {
 	elif [[ "${type}" == "neogeo" ]]; then
 		if [[ ! -d "${romdir}/neogeo/" ]]; then
 			if _yesno "${romdir}/neogeo/ Does not exist.\n\nDo you want to install lr-fbalpha"; then
-					sudo RetroPie-Setup/retropie_packages.sh lr-fbalpha
+				sudo RetroPie-Setup/retropie_packages.sh lr-fbalpha
 			fi
 		fi
 
@@ -380,7 +380,7 @@ _getType() {
 }
 
 # dialog --fselect broken out to a function,
-# the purpouse is that 
+# the purpouse is that
 # if the screen is smaller then what --fselec can handle
 # I can do somethig else
 # Usage: _fselect "${fullpath}"
@@ -465,7 +465,7 @@ _error() {
 		"${opts[@]}" \
 		--msgbox "${msg}" \
 		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
-		answer="${?}"
+	answer="${?}"
 	[[ -n "${exitcode}" ]] && _exit "${exitcode}"
 	return "${answer}"
 }
