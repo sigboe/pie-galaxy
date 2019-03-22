@@ -101,6 +101,20 @@ _Library() {
 
 	if [[ -n "${selectedGame}" ]]; then
 		_description "${selectedGame}"
+
+		case "${?}" in
+		1 | 255)
+			# cancel or esc
+			unset selectedGame
+			unset gameName
+			return
+			;;
+
+		3)
+			_Download
+			;;
+		esac
+
 	fi
 
 }
@@ -123,8 +137,8 @@ _description() {
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by ScummVM" "${gameDescription}"
 	fi
 
-	_msgbox "${gameDescription}" --title "${gameName}" --ok-label "Select"
-
+	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Select" --extra-button --extra-label "Download" --no-label "Cancel"
+	return "${?}"
 }
 
 _Connect() {
