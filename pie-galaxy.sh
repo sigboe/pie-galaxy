@@ -199,30 +199,35 @@ _Sync() {
 }
 
 _Install() {
-	local fileSelected setupInfo gameName gameID type shortName extension
+	local fileSelected setupInfo gameName gameID gameType shortName extension
 	fileSelected=$(_fselect "${downdir}")
 	extension="${fileSelected##*.}"
 	fileSize="$(du -h "${fileSelected}" | cut -f1)"
 
-	if ! [[ -f "${fileSelected}" ]]; then
+	if [[ ! -f "${fileSelected}" ]]; then
 		_error "No file was selected."
 		return
+	fi
 
-	elif [[ "${extension,,}" != "exe" && "${extension,,}" != "sh" ]]; then
-		_error "$(basename "${fileSelected}")\n${fileSize}\n\nFile extension ${extension} not supported. Supported extensions are exe or sh." --extra-button --extra-label "Delete"
-		if [[ "${?}" == "3" ]]; then rm "${fileSelected}"; fi
-		return
-
-	elif [[ "${extension,,}" == "exe" ]]; then
+	case "${extension,,}" in
+	"exe")
 		setupInfo="$("${innobin}" --gog-game-id "${fileSelected}")"
 		gameName="$(echo "${setupInfo}" |& awk -F'"' '{print $2}')"
 		gameID="$("${innobin}" -s --gog-game-id "${fileSelected}")"
+		;;
 
-	elif [[ "${extension,,}" == "sh" ]]; then
+	"sh")
 		gameName="$(grep -a -m 1 "label=" "${fileSelected}" |& awk -F'"' '{print $2}' | sed 's: (GOG.com)::')"
 		setupInfo="Can't read info from .sh files yet."
 		gameID="0"
-	fi
+		;;
+
+	*)
+		_error "$(basename "${fileSelected}")\n${fileSize}\n\nFile extension ${extension} not supported. Supported extensions are exe or sh." --extra-button --extra-label "Delete"
+		if [[ "${?}" == "3" ]]; then rm "${fileSelected}"; fi
+		return
+		;;
+	esac
 
 	_yesno "${setupInfo}" --title "${gameName}" --extra-button --extra-label "Delete" --ok-label "Install"
 
@@ -231,6 +236,7 @@ _Install() {
 		# cancel or esc
 		return
 		;;
+
 	3)
 		#delete
 		rm "${fileSelected}" || {
@@ -270,18 +276,20 @@ _Install() {
 		return
 	fi
 
-	type=$(_getType "${gameName}")
+	gameType=$(_getType "${gameName}")
 
-	if [[ "${type}" == "dosbox" ]]; then
+	case "${gameType}" in
+
+	"dosbox")
 		mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}" || {
 			_error "Unable to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."
 			return
 		}
-		cd "${romdir}/pc" || _error "unable to access ${romdir}/pc\nFailed to create launcher."
-		ln -sf "${scriptdir}/dosbox-launcher.sh" "${gameName}.sh" || _error "Failed to create launcher."
+		ln -sf "${scriptdir}/dosbox-launcher.sh" "${romdir}/pc/${gameName}.sh" || _error "Failed to create launcher."
 		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
+		;;
 
-	elif [[ "${type}" == "scummvm" ]]; then
+	"scummvm")
 		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
 		mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || {
 			_error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
@@ -290,17 +298,16 @@ _Install() {
 		echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
 		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${scummvmdir}\n\nTo finish the installation and open ScummVM and add game, or install lr-scummvm." --title "${gameName} was installed."
 
-	elif [[ "${type}" == "neogeo" ]]; then
-		if [[ ! -d "${romdir}/neogeo/" ]]; then
-			if _yesno "${romdir}/neogeo/ Does not exist.\n\nDo you want to install lr-fbalpha"; then
-				sudo RetroPie-Setup/retropie_packages.sh lr-fbalpha
-			fi
+		;;
+
+	"neogeo")
+		if [[ ! -d "${romdir}/neogeo/" ]] && _yesno "${romdir}/neogeo/ Does not exist.\n\nDo you want to install lr-fbalpha"; then
+			sudo RetroPie-Setup/retropie_packages.sh lr-fbalpha
+
 		fi
 
-		if [[ -f "${romdir}/neogeo/neogeo.zip" ]]; then
-			if _yesno "neogeo.zip already existsts in ${romdir}/neogeo/\n\nDo you want to overwrite?"; then
-				cp -f "${tmpdir}/${gameName}/game/neogeo.zip" "${romdir}/neogeo/"
-			fi
+		if [[ -f "${romdir}/neogeo/neogeo.zip" ]] && _yesno "neogeo.zip already existsts in ${romdir}/neogeo/\n\nDo you want to overwrite?"; then
+			cp -f "${tmpdir}/${gameName}/game/neogeo.zip" "${romdir}/neogeo/"
 
 		else
 			cp "${tmpdir}/${gameName}/game/neogeo.zip" "${romdir}/neogeo/"
@@ -314,11 +321,13 @@ _Install() {
 			_error "Game not supported yet."
 			return
 		fi
+		;;
 
-	elif [[ "${type}" == "unsupported" ]]; then
+	"unsupported")
 		_error "${fileSelected} apperantly is unsupported."
 		return
-	fi
+		;;
+	esac
 
 }
 
@@ -331,7 +340,8 @@ _extract() {
 	gameName="${2}"
 	extension="${fileSelected##*.}"
 
-	if [[ "${extension,,}" == "exe" ]]; then
+	case "${extension,,}" in
+	"exe")
 		#There is a bug in innoextract that missinterprets the filestructure. using dirname & find as a workaround
 		local folder
 		rm -rf "${tmpdir:?}/output"
@@ -350,8 +360,9 @@ _extract() {
 			cp -r "${folder}"/__support/app/* "${folder}/"
 		fi
 		mv "${folder}" "${tmpdir}/${gameName}"
+		;;
 
-	elif [[ "${extension,,}" == "sh" ]]; then
+	sh)
 		rm -rf "${tmpdir:?}/output"
 		rm -rf "${tmpdir:?}/${gameName}"
 		mkdir -p "${tmpdir}/output" | {
@@ -361,10 +372,12 @@ _extract() {
 		unzip "${fileSelected}" -d "${tmpdir}/output"
 		folder="${tmpdir}/output/data/noarch"
 		mv "${folder}" "${tmpdir}/${gameName}"
+		;;
 
-	else
+	*)
 		_error "File extension not supported."
-	fi
+		;;
+	esac
 
 }
 
