@@ -199,7 +199,7 @@ _Sync() {
 }
 
 _Install() {
-	local fileSelected setupInfo gameName gameID gameType shortName extension
+	local fileSelected setupInfo gameName gameID gameType shortName extension subdir
 	fileSelected="$(_fselect "${downdir}")"
 	extension="${fileSelected##*.}"
 	fileSize="$(du -h "${fileSelected}")"
@@ -295,8 +295,10 @@ _Install() {
 		;;
 
 	"scummvm")
-		shortName="$(find "${tmpdir}/${gameName}" -name '*.ini' -exec grep -Pom 1 'gameid=\K.*' {} +)"
-		mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || {
+		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= 'NR==1{print $2}' | sed -e "s/\r//g") 
+
+		[[ "${extension,,}" == "sh" ]] && subdir="/data"
+		mv -f "${tmpdir}/${gameName}${subdir}" "${scummvmdir}/${gameName}.svm" || {
 			_error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
 			return
 		}
