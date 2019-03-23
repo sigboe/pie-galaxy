@@ -82,22 +82,22 @@ main() {
 		"About" "About this program"
 	)
 
-	selected=$(dialog \
+	selected="$(dialog \
 		--backtitle "${title}" \
 		--cancel-label "Exit" \
 		--menu "Choose one" \
-		22 77 16 "${menuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)")
+		22 77 16 "${menuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)")"
 
 }
 
 _Library() {
-	mapfile -t myLibrary < <(echo "${wyvernls}" | jq --raw-output '.games[] | .ProductInfo | .id, .title')
+	mapfile -t myLibrary < <(jq --raw-output '.games[] | .ProductInfo | .id, .title' <<<"${wyvernls}")
 
 	unset selectedGame
-	selectedGame=$(dialog \
+	selectedGame="$(dialog \
 		--backtitle "${title}" \
 		--ok-label "Details" \
-		--menu "Choose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
+		--menu "Choose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
 
 	if [[ -n "${selectedGame}" ]]; then
 		_description "${selectedGame}"
@@ -123,17 +123,17 @@ _Library() {
 # Checks if game is dosbox or scummvm by curling the store page
 # usage _description "${gameID}"
 _description() {
-	gameName=$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .title')
+	gameName="$(jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
 	gameDescription="$(curl -s "http://api.gog.com/products/${1}?expand=description" | jq --raw-output '.description | .full' | "${renderhtml[@]}")"
 
 	local url page
-	url="$(echo "${wyvernls}" | jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .url')"
+	url="$(jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .url' <<<"${wyvernls}")"
 	page="$(curl -s "https://www.gog.com${url}")"
 
-	if echo "${page}" | grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox"; then
+	if grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox" <<<"${page}"; then
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by DOSBox" "${gameDescription}"
 
-	elif echo "${page}" | grep -q "This game is powered by <a href=http://scummvm.org>ScummVM"; then
+	elif grep -q "This game is powered by <a href=http://scummvm.org>ScummVM" <<<"${page}"; then
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by ScummVM" "${gameDescription}"
 	fi
 
@@ -142,7 +142,7 @@ _description() {
 }
 
 _Connect() {
-	availableGames=$("${wyvernbin}" connect ls 2>&1)
+	availableGames="$("${wyvernbin}" connect ls 2>&1)"
 
 	if _yesno "Available games:\n\n${availableGames##*wyvern} \n\nDo you want to claim the games?"; then
 		"${wyvernbin}" connect claim
@@ -169,7 +169,7 @@ _Download() {
 
 _checklogin() {
 	if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
-		wyvernls=$(timeout 30 "${wyvernbin}" ls --json) || _error "It took longer than 30 seconds. You may need to log in again.\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
+		wyvernls="$(timeout 30 "${wyvernbin}" ls --json)" || _error "It took longer than 30 seconds. You may need to log in again.\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
 
 	else
 		_error "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
@@ -200,7 +200,7 @@ _Sync() {
 
 _Install() {
 	local fileSelected setupInfo gameName gameID gameType shortName extension
-	fileSelected=$(_fselect "${downdir}")
+	fileSelected="$(_fselect "${downdir}")"
 	extension="${fileSelected##*.}"
 	fileSize="$(du -h "${fileSelected}" | cut -f1)"
 
@@ -212,12 +212,12 @@ _Install() {
 	case "${extension,,}" in
 	"exe")
 		setupInfo="$("${innobin}" --gog-game-id "${fileSelected}")"
-		gameName="$(echo "${setupInfo}" |& awk -F'"' '{print $2}')"
+		gameName="$(awk -F'"' 'NR==1{print $2}' <<<"${setupInfo}")" 
 		gameID="$("${innobin}" -s --gog-game-id "${fileSelected}")"
 		;;
 
 	"sh")
-		gameName="$(grep -a -m 1 "label=" "${fileSelected}" |& awk -F'"' '{print $2}' | sed 's: (GOG.com)::')"
+		gameName="$(grep -a -m 1 "label=" "${fileSelected}" |& awk -F"\"|\ \(GOG.com\)" '{print $2}')"
 		setupInfo="Can't read info from .sh files yet."
 		gameID="0"
 		;;
@@ -249,12 +249,13 @@ _Install() {
 	esac
 
 	# If the setup.exe doesn't have the gameID try to fetch it from the gameName and the library.
-	[[ -z "${gameID}" ]] && gameID=$(echo "${wyvernls}" | jq --raw-output --arg var "${gameName}" '.games[] | .ProductInfo | select(.title==$var) | .id')
+	[[ -z "${gameID}" ]] && gameID="$(echo "${wyvernls}" | jq --raw-output --arg var "${gameName}" '.games[] | .ProductInfo | select(.title==$var) | .id')"
 
 	if [[ -z "${gameID}" ]]; then
 		# If setup.exe still doesn't contain gameID, try guessing the slug, and fetchign the ID that way.
-		gameSlug=$(echo "${gameName// /_}" | tr '[:upper:]' '[:lower:]')
-		gameID=$(echo "${wyvernls}" | jq --raw-output --arg var "${gameSlug}" '.games[] | .ProductInfo | select(.slug==$var) | .id')
+		gameSlug="${gameName// /_}"
+		gameSlug="${gameSlug,,}"
+		gameID="$(jq --raw-output --arg var "${gameSlug}" '.games[] | .ProductInfo | select(.slug==$var) | .id' <<<"${wyvernls}")"
 	fi
 
 	[[ -z "${gameID}" ]] && {
@@ -263,7 +264,9 @@ _Install() {
 	}
 
 	#Sanitize game name
-	gameName=$(echo "${gameName}" | sed -e 's:™::g' -e 's:  *: :g')
+	gameName="${gameName/™/}"
+	gameName="${gameName/©/}"
+	gameName="${gameName//+([[:blank:]])/ }"
 
 	_extract "${fileSelected}" "${gameName}"
 
@@ -276,7 +279,7 @@ _Install() {
 		return
 	fi
 
-	gameType=$(_getType "${gameName}")
+	gameType="$(_getType "${gameName}")"
 
 	case "${gameType}" in
 
@@ -290,7 +293,7 @@ _Install() {
 		;;
 
 	"scummvm")
-		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec cat {} + | grep gameid | awk -F= '{print $2}' | sed -e "s/\r//g")
+		shortName="$(find "${tmpdir}/${gameName}" -name '*.ini' -exec grep -Pom 1 'gameid=\K.*' {} +)"
 		mv -f "${tmpdir}/${gameName}" "${scummvmdir}/${gameName}.svm" || {
 			_error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
 			return
@@ -346,12 +349,12 @@ _extract() {
 		local folder
 		rm -rf "${tmpdir:?}/output"
 		rm -rf "${tmpdir:?}/${gameName}"
-		mkdir -p "${tmpdir}/output" | {
+		mkdir -p "${tmpdir}/output" || {
 			_error "Could not initialize temp folder for extraction"
 			return
 		}
 		"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output"
-		folder=$(dirname "$(find "${tmpdir}/output" -name 'goggame-*.info')")
+		folder="$(dirname "$(find "${tmpdir}/output" -name 'goggame-*.info')")"
 		if [[ "${folder}" == "." ]]; then
 			# Didn't find goggame-*.info, now we must rely on exception to catch this install.
 			folder="${tmpdir}/output/app"
@@ -362,10 +365,10 @@ _extract() {
 		mv "${folder}" "${tmpdir}/${gameName}"
 		;;
 
-	sh)
+	"sh")
 		rm -rf "${tmpdir:?}/output"
 		rm -rf "${tmpdir:?}/${gameName}"
-		mkdir -p "${tmpdir}/output" | {
+		mkdir -p "${tmpdir}/output" || {
 			_error "Could not initialize temp folder for extraction"
 			return
 		}
@@ -387,7 +390,7 @@ _extract() {
 _getType() {
 
 	local gamePath type
-	gamePath=$(cat "${tmpdir}/${1}/"goggame-*.info | jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path')
+	gamePath="$(jq --raw-output '.playTasks[] | select(.isPrimary==true) | .path' <"${tmpdir}/${1}/"goggame-*.info)"
 
 	if [[ "${gamePath}" == *"DOSBOX"* ]] || [[ -d "${tmpdir}/${1}/DOSBOX" ]] || [[ -d "${tmpdir}/${1}/dosbox" ]]; then
 		type="dosbox"
@@ -395,7 +398,7 @@ _getType() {
 	elif [[ "${gamePath}" == *"scummvm"* ]] || [[ -d "${tmpdir}/${1}/scummvm" ]]; then
 		type="scummvm"
 
-	elif [[ $(find "${tmpdir}/${1}" -name "neogeo.zip") ]]; then
+	elif [[ "$(find "${tmpdir}/${1}" -name "neogeo.zip")" ]]; then
 		type="neogeo"
 
 	else
@@ -414,7 +417,7 @@ _getType() {
 # returns the file that is selected including the full path, if full path is used.
 _fselect() {
 	local termh windowh dirlist selected
-	termh=$(tput lines)
+	termh="$(tput lines)"
 	((windowh = "${termh}" - 10))
 	[[ "${windowh}" -gt "22" ]] && windowh="22"
 	if [[ "${windowh}" -ge "8" ]]; then
@@ -428,13 +431,13 @@ _fselect() {
 		# make an array of the filenames and put them into --menu instead
 		while read -r filename; do
 			dirlist+=("$(basename "${filename}")")
-			dirlist+=("$("${innobin}" --gog-game-id "${filename}" |& awk -F'"' '{print $2}')")
+			dirlist+=("$("${innobin}" --gog-game-id "${filename}" |& awk -F'"' 'NR==1{print $2}')")
 
 		done < <(find "${1}" -maxdepth 1 -type f)
-		selected=$(dialog \
+		selected="$(dialog \
 			--backtitle "${title}" \
 			--menu "Choose one" \
-			22 77 16 "${dirlist[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")
+			22 77 16 "${dirlist[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
 		echo "${selected}"
 	fi
 
