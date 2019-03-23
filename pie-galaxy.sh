@@ -355,7 +355,7 @@ _extract() {
 			_error "Could not initialize temp folder for extraction"
 			return
 		}
-		"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output"
+		"${innobin}" --gog "${fileSelected}" --output-dir "${tmpdir}/output" &>"$(tty)"
 		folder="$(dirname "$(find "${tmpdir}/output" -name 'goggame-*.info')")"
 		if [[ "${folder}" == "." ]]; then
 			# Didn't find goggame-*.info, now we must rely on exception to catch this install.
