@@ -152,7 +152,7 @@ _Connect() {
 }
 
 _Download() {
-	if [[ -z ${selectedGame} ]]; then
+	if [[ -z "${selectedGame}" ]]; then
 		_msgbox "No game selected, please use one from your library."
 		return
 
@@ -182,7 +182,7 @@ _About() {
 	gitbranch="$(git --git-dir="${scriptdir}/.git" rev-parse --abbrev-ref HEAD)"
 	builddate="$(git --git-dir="${scriptdir}/.git" log -1 --date=short --pretty=format:%cd)"
 	wyvernVersion="$(${wyvernbin} --version)"
-	innoVersion="$(${innobin} --version -s)"
+	innoVersion="$("${innobin}" --version -s)"
 	read -rd '' about <<_EOF_
 Pie Galaxy ${version}-${gitbranch}-${builddate} + ${githash}
 innoextract ${innoVersion}
@@ -474,7 +474,7 @@ _yesno() {
 		"${opts[@]}" \
 		--yesno "${msg}" \
 		22 77 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
-	return ${?}
+	return "${?}"
 }
 
 # Display an error
