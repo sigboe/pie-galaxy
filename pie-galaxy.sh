@@ -374,7 +374,7 @@ _extract() {
 			_error "Could not initialize temp folder for extraction"
 			return
 		}
-		unzip "${fileSelected}" -d "${tmpdir}/output"
+		unzip "${fileSelected}" -d "${tmpdir}/output" &>"$(tty)"
 		folder="${tmpdir}/output/data/noarch"
 		mv "${folder}" "${tmpdir}/${gameName}"
 		;;
