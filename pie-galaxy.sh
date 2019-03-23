@@ -202,7 +202,8 @@ _Install() {
 	local fileSelected setupInfo gameName gameID gameType shortName extension
 	fileSelected="$(_fselect "${downdir}")"
 	extension="${fileSelected##*.}"
-	fileSize="$(du -h "${fileSelected}" | cut -f1)"
+	fileSize="$(du -h "${fileSelected}")"
+	fileSize="${fileSize%%	*}"
 
 	if [[ ! -f "${fileSelected}" ]]; then
 		_error "No file was selected."
@@ -217,7 +218,8 @@ _Install() {
 		;;
 
 	"sh")
-		gameName="$(grep -a -m 1 "label=" "${fileSelected}" |& awk -F"\"|\ \(GOG.com\)" '{print $2}')"
+		gameName="$(grep -Poam 1 'label="\K.*' "${fileSelected}")"
+		gameName="${gameName% (GOG.com)\"}"
 		setupInfo="Can't read info from .sh files yet."
 		gameID="0"
 		;;
@@ -249,7 +251,7 @@ _Install() {
 	esac
 
 	# If the setup.exe doesn't have the gameID try to fetch it from the gameName and the library.
-	[[ -z "${gameID}" ]] && gameID="$(echo "${wyvernls}" | jq --raw-output --arg var "${gameName}" '.games[] | .ProductInfo | select(.title==$var) | .id')"
+	[[ -z "${gameID}" ]] && gameID="$(jq --raw-output --arg var "${gameName}" '.games[] | .ProductInfo | select(.title==$var) | .id' <<<"${wyvernls}")"
 
 	if [[ -z "${gameID}" ]]; then
 		# If setup.exe still doesn't contain gameID, try guessing the slug, and fetchign the ID that way.
