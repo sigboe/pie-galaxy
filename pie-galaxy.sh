@@ -295,7 +295,8 @@ _Install() {
 		;;
 
 	"scummvm")
-		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec grep -Pom 1 'gameid=\K.*' {} \; -quit | sed -e "s/\r//g") 
+		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec grep -Pom 1 'gameid=\K.*' {} \; -quit) 
+		shortName=${shortName%$'\r'}
 
 		[[ "${extension,,}" == "sh" ]] && subdir="/data"
 		mv -f "${tmpdir}/${gameName}${subdir}" "${scummvmdir}/${gameName}.svm" || {
