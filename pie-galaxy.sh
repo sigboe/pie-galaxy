@@ -20,6 +20,7 @@ exceptions="${scriptdir}/exceptions"
 renderhtml=(html2text -width 999 -style pretty)
 retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
+fullFileBrowser=false
 version="0.2"
 
 # fix UTF-8 symbols like © or ™
@@ -419,32 +420,48 @@ _getType() {
 # the purpouse is that
 # if the screen is smaller then what --fselec can handle
 # I can do somethig else
-# Usage: _fselect "${fullpath}"
+# Usage: _fselect "${fullPath}"
 # returns the file that is selected including the full path, if full path is used.
 _fselect() {
-	local termh windowh dirlist selected
+	local termh windowh dirlist selected extension fileName fullPath gameName
+	fullPath="${1}"
 	termh="$(tput lines)"
 	((windowh = "${termh}" - 10))
 	[[ "${windowh}" -gt "22" ]] && windowh="22"
-	if [[ "${windowh}" -ge "8" ]]; then
+	if "${fullFileBrowser}" && [[ "${windowh}" -ge "8" ]]; then
 		dialog \
 			--backtitle "${title}" \
-			--fselect "${1}/" \
+			--fselect "${fullPath}/" \
 			"${windowh}" 77 3>&1 1>&2 2>&3 >"$(tty)"
 
 	else
 		# in case of a very tiny terminal window
 		# make an array of the filenames and put them into --menu instead
-		while read -r filename; do
-			dirlist+=("$(basename "${filename}")")
-			dirlist+=("$("${innobin}" --gog-game-id "${filename}" |& awk -F'"' 'NR==1{print $2}')")
+		while read -r fileName; do
+			extension="${fileName##*.}"
+			case "${extension,,}" in
+				"exe")
+					dirlist+=("$(basename "${fileName}")")
+
+					gameName="$("${innobin}" --gog-game-id "${fileName}")"
+					gameName="$(awk -F'"' 'NR==1{print $2}' <<<"${gameName}")"
+					dirlist+=("${gameName}")
+					;;
+
+				"sh")
+					dirlist+=("$(basename "${fileName}")")
+
+					gameName="$(grep -Poam 1 'label="\K.*' "${fileName}")"
+					dirlist+=("${gameName% (GOG.com)\"}")
+					;;
+			esac
 
 		done < <(find "${1}" -maxdepth 1 -type f)
 		selected="$(dialog \
 			--backtitle "${title}" \
 			--menu "Choose one" \
 			22 77 16 "${dirlist[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
-		echo "${selected}"
+		echo "${fullPath}/${selected}"
 	fi
 
 }
