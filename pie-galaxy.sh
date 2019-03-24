@@ -423,7 +423,7 @@ _getType() {
 # Usage: _fselect "${fullPath}"
 # returns the file that is selected including the full path, if full path is used.
 _fselect() {
-	local termh windowh dirlist selected extension fileName fullPath gameName
+	local termh windowh dirList selected extension fileName fullPath gameName newDir
 	fullPath="${1}"
 	termh="$(tput lines)"
 	((windowh = "${termh}" - 10))
@@ -431,39 +431,66 @@ _fselect() {
 	if "${fullFileBrowser}" && [[ "${windowh}" -ge "8" ]]; then
 		dialog \
 			--backtitle "${title}" \
+			--title "${fullPath}" \
 			--fselect "${fullPath}/" \
 			"${windowh}" 77 3>&1 1>&2 2>&3 >"$(tty)"
 
 	else
 		# in case of a very tiny terminal window
 		# make an array of the filenames and put them into --menu instead
+		dirList=("goto" "Go to another directory (requires a keyboard)")
+
 		while read -r fileName; do
 			extension="${fileName##*.}"
 			case "${extension,,}" in
 				"exe")
-					dirlist+=("$(basename "${fileName}")")
+					dirList+=("$(basename "${fileName}")")
 
 					gameName="$("${innobin}" --gog-game-id "${fileName}")"
 					gameName="$(awk -F'"' 'NR==1{print $2}' <<<"${gameName}")"
-					dirlist+=("${gameName}")
+					dirList+=("${gameName}")
 					;;
 
 				"sh")
-					dirlist+=("$(basename "${fileName}")")
+					dirList+=("$(basename "${fileName}")")
 
 					gameName="$(grep -Poam 1 'label="\K.*' "${fileName}")"
-					dirlist+=("${gameName% (GOG.com)\"}")
+					dirList+=("${gameName% (GOG.com)\"}")
 					;;
 			esac
 
 		done < <(find "${1}" -maxdepth 1 -type f)
 		selected="$(dialog \
 			--backtitle "${title}" \
+			--title "${fullPath}" \
 			--menu "Choose one" \
-			22 77 16 "${dirlist[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
-		echo "${fullPath}/${selected}"
+			22 77 16 "${dirList[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
+		if [[ "${selected}" == "goto" ]]; then
+			newDir="$(_inputbox "Input a directory to go to" "${HOME}/Downloads")"
+			_fselect "${newDir}"
+
+		else
+			echo "${fullPath}/${selected}"
+		fi
 	fi
 
+}
+
+# Ask user for a string
+# Usage: _inputbox "My message" "Initial text" [--optional-arguments]
+# You can pass additioal arguments to the dialog program
+# Backtitle is already set
+_inputbox() {
+	local msg opts init
+	msg="${1}"
+	init="${2}"
+	shift 2
+	opts=("${@}")
+	dialog \
+		--backtitle "${title}" \
+		"${opts[@]}" \
+		--inputbox "${msg}" \
+		22 77 "${init}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)"
 }
 
 # Display a message
