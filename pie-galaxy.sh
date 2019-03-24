@@ -214,7 +214,7 @@ _Install() {
 	case "${extension,,}" in
 	"exe")
 		setupInfo="$("${innobin}" --gog-game-id "${fileSelected}")"
-		gameName="$(awk -F'"' 'NR==1{print $2}' <<<"${setupInfo}")" 
+		gameName="$(awk -F'"' 'NR==1{print $2}' <<<"${setupInfo}")"
 		gameID="$("${innobin}" -s --gog-game-id "${fileSelected}")"
 		;;
 
@@ -287,18 +287,18 @@ _Install() {
 	case "${gameType}" in
 
 	"dosbox")
-		[[ ! -d  "${dosboxdir}" ]] || {
+		[[ ! -d "${dosboxdir}" ]] || {
 			_error "Unable to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."
 			return
 		}
-		[[ ! -d  "${dosboxdir}/gog" ]] || mkdir -p "${dosboxdir}/gog"
-		mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}" 
+		[[ ! -d "${dosboxdir}/gog" ]] || mkdir -p "${dosboxdir}/gog"
+		mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}"
 		ln -sf "${scriptdir}/dosbox-launcher.sh" "${romdir}/pc/${gameName}.sh" || _error "Failed to create launcher."
 		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
 		;;
 
 	"scummvm")
-		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec grep -Pom 1 'gameid=\K.*' {} \; -quit) 
+		shortName=$(find "${tmpdir}/${gameName}" -name '*.ini' -exec grep -Pom 1 'gameid=\K.*' {} \; -quit)
 		shortName=${shortName%$'\r'}
 
 		[[ "${extension,,}" == "sh" ]] && subdir="/data"
@@ -443,20 +443,20 @@ _fselect() {
 		while read -r fileName; do
 			extension="${fileName##*.}"
 			case "${extension,,}" in
-				"exe")
-					dirList+=("$(basename "${fileName}")")
+			"exe")
+				dirList+=("$(basename "${fileName}")")
 
-					gameName="$("${innobin}" --gog-game-id "${fileName}")"
-					gameName="$(awk -F'"' 'NR==1{print $2}' <<<"${gameName}")"
-					dirList+=("${gameName}")
-					;;
+				gameName="$("${innobin}" --gog-game-id "${fileName}")"
+				gameName="$(awk -F'"' 'NR==1{print $2}' <<<"${gameName}")"
+				dirList+=("${gameName}")
+				;;
 
-				"sh")
-					dirList+=("$(basename "${fileName}")")
+			"sh")
+				dirList+=("$(basename "${fileName}")")
 
-					gameName="$(grep -Poam 1 'label="\K.*' "${fileName}")"
-					dirList+=("${gameName% (GOG.com)\"}")
-					;;
+				gameName="$(grep -Poam 1 'label="\K.*' "${fileName}")"
+				dirList+=("${gameName% (GOG.com)\"}")
+				;;
 			esac
 
 		done < <(find "${1}" -maxdepth 1 -type f)
