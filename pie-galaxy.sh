@@ -305,7 +305,6 @@ _Install() {
 		}
 		echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
 		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${scummvmdir}\n\nTo finish the installation and open ScummVM and add game, or install lr-scummvm." --title "${gameName} was installed."
-
 		;;
 
 	"neogeo")
