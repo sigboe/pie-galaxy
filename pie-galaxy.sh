@@ -20,7 +20,7 @@ exceptions="${scriptdir}/exceptions"
 renderhtml=(html2text -width 999 -style pretty)
 retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
-fullFileBrowser=false
+fullFileBrowser="false"
 version="0.2"
 
 # fix UTF-8 symbols like © or ™
