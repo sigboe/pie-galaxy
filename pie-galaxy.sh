@@ -438,7 +438,15 @@ _fselect() {
 	else
 		# in case of a very tiny terminal window
 		# make an array of the filenames and put them into --menu instead
-		dirList=("goto" "Go to directory (keyboard required)")
+		dirList=(
+			"goto" "Go to directory (keyboard required)"
+			".." "Up one directory"
+		)
+
+		while read -r folderName; do
+			dirList+=("$(basename "${folderName}")" "Directory")
+
+		done < <(find "${fullPath}" -mindepth 1 -maxdepth 1 ! -name '.*' -type d)
 
 		while read -r fileName; do
 			extension="${fileName##*.}"
@@ -459,19 +467,32 @@ _fselect() {
 				;;
 			esac
 
-		done < <(find "${1}" -maxdepth 1 -type f)
+		done < <(find "${fullPath}" -maxdepth 1 -type f)
+
 		selected="$(dialog \
 			--backtitle "${title}" \
 			--title "${fullPath}" \
 			--menu "Pick a file to install" \
 			22 77 16 "${dirList[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
-		if [[ "${selected}" == "goto" ]]; then
-			newDir="$(_inputbox "Input a directory to go to" "${HOME}/Downloads")"
-			_fselect "${newDir}"
+		
+		[[ "${?}" -ge 1 ]] && return
 
-		else
-			echo "${fullPath}/${selected}"
-		fi
+		case "${selected}" in
+			"goto")
+				newDir="$(_inputbox "Input a directory to go to" "${HOME}/Downloads")"
+				_fselect "${newDir}"
+				;;
+			"..")
+				_fselect "${fullPath%/*}" 
+				;;
+			*.sh | *.exe)
+				echo "${fullPath}/${selected}"
+				;;
+			*)
+				_fselect "${fullPath}/${selected}"
+				;;
+		esac
+
 	fi
 
 }
