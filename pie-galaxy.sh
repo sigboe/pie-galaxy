@@ -127,7 +127,7 @@ _Library() {
 
 		3)
 			# Image button
-			"${imgViewer[@]}" "${imageCache}" </dev/tty &>/dev/null || _error "Image viewer failed"
+			"${imgViewer[@]}" "${imageCache}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
 			_Library "${selectedGame}"
 			;;
 		esac
