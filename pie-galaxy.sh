@@ -16,11 +16,13 @@ biosdir="${HOME}/RetroPie/BIOS"
 scriptdir="$(dirname "$(readlink -f "${0}")")"
 wyvernbin="${scriptdir}/wyvern"
 innobin="${scriptdir}/innoextract"
+imgViewer=(fbi -1 -t 5 -noverbose -a) #fbi -a -1 -t 5 #"${scriptdir}/pixterm" -d 1 -s 1
 exceptions="${scriptdir}/exceptions"
 renderhtml=(html2text -width 999 -style pretty)
 retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 fullFileBrowser="false"
+showImage="true"
 version="0.2"
 
 # fix UTF-8 symbols like © or ™
@@ -71,6 +73,10 @@ _depends() {
 	if ! [[ -x "$(command -v "${renderhtml[0]}")" ]]; then
 		renderhtml=(sed 's:\<br\>:\\n:g')
 	fi
+
+	if [[ -n "$DISPLAY" ]]; then
+		imgViewer=(feh -F -N -Z -Y -q -D 5 --on-last-slide quit)
+	fi
 }
 
 main() {
@@ -92,27 +98,37 @@ main() {
 }
 
 _Library() {
+	local preSelected
+	preSelected="${1}"
+
+	[[ -n "${preSelected}" ]] && _description "${preSelected}"
+
 	mapfile -t myLibrary < <(jq --raw-output '.games[] | .ProductInfo | .id, .title' <<<"${wyvernls}")
 
-	unset selectedGame
 	selectedGame="$(dialog \
 		--backtitle "${title}" \
 		--ok-label "Details" \
+		--default-item "${selectedGame}" \
 		--menu "Choose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
 
 	if [[ -n "${selectedGame}" ]]; then
 		_description "${selectedGame}"
 
 		case "${?}" in
+		0)
+			# Download button
+			_Download
+			;;
+
 		1 | 255)
-			# cancel or esc
-			unset selectedGame
-			unset gameName
-			return
+			# Back button
+			_Library
 			;;
 
 		3)
-			_Download
+			# Image button
+			"${imgViewer[@]}" "${imageCache}" </dev/tty &>/dev/null || _error "Image viewer failed"
+			_Library "${selectedGame}"
 			;;
 		esac
 
@@ -124,11 +140,16 @@ _Library() {
 # Checks if game is dosbox or scummvm by curling the store page
 # usage _description "${gameID}"
 _description() {
-	gameName="$(jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
-	gameDescription="$(curl -s "http://api.gog.com/products/${1}?expand=description" | jq --raw-output '.description | .full' | "${renderhtml[@]}")"
+	local url page gameID gameDescription imgArgs
+	export gameImage
+	gameID="${1}"
+	gameMetadata="$(curl -s "http://api.gog.com/products/${gameID}?expand=description")"
 
-	local url page
-	url="$(jq --raw-output --argjson var "${1}" '.games[] | .ProductInfo | select(.id==$var) | .url' <<<"${wyvernls}")"
+	gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
+	gameDescription="$(jq --raw-output '.description | .full' <<<"${gameMetadata}")"
+	gameDescription="$(echo "${gameDescription}" | "${renderhtml[@]}")"
+
+	url="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .url' <<<"${wyvernls}")"
 	page="$(curl -s "https://www.gog.com${url}")"
 
 	if grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox" <<<"${page}"; then
@@ -138,7 +159,14 @@ _description() {
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by ScummVM" "${gameDescription}"
 	fi
 
-	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Select" --extra-button --extra-label "Download" --no-label "Cancel"
+	if [[ "${showImage}" ]]; then
+		imgArgs=(--extra-button --extra-label "Image")
+		gameImageURL="https:$(jq --raw-output '.images | .logo2x' <<<"${gameMetadata}")"
+		wget -O "${tmpdir}/${gameID}.${gameImageURL##*.}" "${gameImageURL}"
+		imageCache="${tmpdir}/${gameID}.${gameImageURL##*.}"
+	fi
+
+	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Download" "${imgArgs[@]}" --no-label "Back" --defaultno
 	return "${?}"
 }
 
