@@ -474,23 +474,25 @@ _fselect() {
 			--title "${fullPath}" \
 			--menu "Pick a file to install" \
 			22 77 16 "${dirList[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
-		
+
 		[[ "${?}" -ge 1 ]] && return
 
 		case "${selected}" in
-			"goto")
-				newDir="$(_inputbox "Input a directory to go to" "${HOME}/Downloads")"
-				_fselect "${newDir}"
-				;;
-			"..")
+		"goto")
+			newDir="$(_inputbox "Input a directory to go to" "${HOME}/Downloads")"
+			_fselect "${newDir}"
+			;;
+		"..")
+			_fselect "${fullPath%/*}"
 				_fselect "${fullPath%/*}" 
-				;;
-			*.sh | *.exe)
-				echo "${fullPath}/${selected}"
-				;;
-			*)
-				_fselect "${fullPath}/${selected}"
-				;;
+			_fselect "${fullPath%/*}"
+			;;
+		*.sh | *.exe)
+			echo "${fullPath}/${selected}"
+			;;
+		*)
+			_fselect "${fullPath}/${selected}"
+			;;
 		esac
 
 	fi
