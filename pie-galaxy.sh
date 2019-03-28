@@ -76,9 +76,8 @@ _depends() {
 main() {
 	menuOptions=(
 		"Connect" "Operations associated with GOG Connect"
-		"Download" "Download game ${gameName:-selected from the Library}"
-		"Install" "Install a GOG game from an installer"
 		"Library" "List all games you own"
+		"Install" "Install a GOG game from an installer"
 		"Sync" "Sync a game's saves to a specific location for backup"
 		"About" "About this program"
 	)
@@ -86,6 +85,7 @@ main() {
 	selected="$(dialog \
 		--backtitle "${title}" \
 		--cancel-label "Exit" \
+		--default-item "${selected}" \
 		--menu "Choose one" \
 		22 77 16 "${menuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)")"
 
