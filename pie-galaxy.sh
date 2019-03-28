@@ -484,8 +484,6 @@ _fselect() {
 			;;
 		"..")
 			_fselect "${fullPath%/*}"
-				_fselect "${fullPath%/*}" 
-			_fselect "${fullPath%/*}"
 			;;
 		*.sh | *.exe)
 			echo "${fullPath}/${selected}"
