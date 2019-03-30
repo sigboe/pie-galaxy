@@ -101,36 +101,23 @@ _Library() {
 	local preSelected
 	preSelected="${1}"
 
-	[[ -n "${preSelected}" ]] && _description "${preSelected}"
+	if [[ -z "${preSelected}" ]]; then
 
-	mapfile -t myLibrary < <(jq --raw-output '.games[] | .ProductInfo | .id, .title' <<<"${wyvernls}")
+		mapfile -t myLibrary < <(jq --raw-output '.games[] | .ProductInfo | .id, .title' <<<"${wyvernls}")
 
-	selectedGame="$(dialog \
-		--backtitle "${title}" \
-		--ok-label "Details" \
-		--default-item "${selectedGame}" \
-		--menu "Choose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
+		selectedGame="$(dialog \
+			--backtitle "${title}" \
+			--ok-label "Details" \
+			--default-item "${selectedGame}" \
+			--menu "Choose one" 22 77 16 "${myLibrary[@]}" 3>&1 1>&2 2>&3 >"$(tty)" <"$(tty)")"
+
+	else
+		selectedGame="${preSelected}"
+
+	fi
 
 	if [[ -n "${selectedGame}" ]]; then
 		_description "${selectedGame}"
-
-		case "${?}" in
-		0)
-			# Download button
-			_Download
-			;;
-
-		1 | 255)
-			# Back button
-			_Library
-			;;
-
-		3)
-			# Image button
-			"${imgViewer[@]}" "${imageCache}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
-			_Library "${selectedGame}"
-			;;
-		esac
 
 	fi
 
@@ -167,7 +154,24 @@ _description() {
 	fi
 
 	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Download" "${imgArgs[@]}" --no-label "Back" --defaultno
-	return "${?}"
+
+	case "${?}" in
+	0)
+		# Download button
+		_Download
+		;;
+
+	1 | 255)
+		# Back button
+		_Library
+		;;
+
+	3)
+		# Image button
+		"${imgViewer[@]}" "${imageCache}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
+		_Library "${selectedGame}" ""
+		;;
+	esac
 }
 
 _Connect() {
