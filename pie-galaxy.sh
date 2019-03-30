@@ -158,6 +158,8 @@ _description() {
 	if [[ "${showImage}" ]]; then
 		imgArgs=(--extra-button --extra-label "Image")
 		gameImageURL="https:$(jq --raw-output '.images | .logo2x' <<<"${gameMetadata}")"
+		#try a bigger resolution
+		gameImageURL="${gameImageURL/_glx_logo_2x/}"
 		wget -O "${tmpdir}/${gameID}.${gameImageURL##*.}" "${gameImageURL}"
 		imageCache="${tmpdir}/${gameID}.${gameImageURL##*.}"
 	fi
