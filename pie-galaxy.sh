@@ -139,11 +139,20 @@ _description() {
 	url="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .url' <<<"${wyvernls}")"
 	page="$(curl -s "https://www.gog.com${url}")"
 
-	if grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox" <<<"${page}"; then
+	if type "${gameID}_exception" &>/dev/null; then
+		printf -v gameDescription '%s\n\n%s\n' "Installer for this game found in the exception list" "${gameDescription}"
+
+	elif grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox" <<<"${page}"; then
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by DOSBox" "${gameDescription}"
 
 	elif grep -q "This game is powered by <a href=http://scummvm.org>ScummVM" <<<"${page}"; then
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by ScummVM" "${gameDescription}"
+
+	elif grep -q "'Developer: Cinemaware'" <<<"${page}"; then
+		printf -v gameDescription '%s\n\n%s\n' "This is an Amiga game" "${gameDescription}"
+
+	elif grep -q "'Developer: SNK CORPORATION'" <<<"${page}"; then
+		printf -v gameDescription '%s\n\n%s\n' "This is a NEO-GEO game" "${gameDescription}"
 	fi
 
 	if [[ "${showImage}" ]]; then
