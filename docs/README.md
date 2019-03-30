@@ -25,12 +25,12 @@ Hopefully you will be able to install this program from the RetroPie setup menu 
 Summary:
 
 * DOSBox games
-* All (I think) ScummVM games
+* ScummVM games
 * ResidualVM games
   * Escape from Monkey Island
 * Amiga games
   * may have some issues still
-* NEO-GEO games
+* NEO-GEO games (Almost all)
 * Native games
   * Ultimate DOOM, The
 
