@@ -6,6 +6,7 @@
 
 #Default settings don't edit as they will be overwritten when you update the program
 #set prefrences in ~/.config/piegalaxy/piegalaxy.conf
+shopt -s extglob
 title="Pie Galaxy"
 tmpdir="${HOME}/.cache/piegalaxy"
 downdir="${HOME}/Downloads"
@@ -312,7 +313,7 @@ _Install() {
 	#Sanitize game name
 	gameName="${gameName/™/}"
 	gameName="${gameName/©/}"
-	gameName="${gameName/+([[:blank:]])/ }"
+	gameName="${gameName//+([[:blank:]])/ }"
 
 	_extract "${fileSelected}" "${gameName}"
 
