@@ -26,7 +26,7 @@ if [[ -d "${dosboxromdir}/${game}/DOSBOX" ]]; then
 		ed -s ../dosboxSTARGUN_single.conf <<<$'g/STARGUN\\.exe/i\\\npause\nw'
 	fi
 
-	readarray -t dosboxargs < <(jq --raw-output '.playTasks[] | select(.isPrimary==true) | .arguments' ../goggame-*.info | sed 's:\\:/:g;s:\"::g')
+	IFS=" " read -r -a dosboxargs < <(jq --raw-output '.playTasks[] | select(.isPrimary==true) | .arguments' ../goggame-*.info | sed 's:\\:/:g;s:\"::g')
 
 	# If case there is no json file with the launch command, we guess the launch command
 	if [[ -z "${dosboxargs[*]}" ]]; then
