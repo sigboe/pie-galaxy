@@ -330,11 +330,11 @@ _Install() {
 	case "${gameType}" in
 
 	"dosbox")
-		[[ ! -d "${dosboxdir}" ]] || {
+		[[ -d "${dosboxdir}" ]] || {
 			_error "Unable to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."
 			return
 		}
-		[[ ! -d "${dosboxdir}/gog" ]] || mkdir -p "${dosboxdir}/gog"
+		[[ ! -d "${dosboxdir}/gog" ]] && mkdir -p "${dosboxdir}/gog"
 		mv -f "${tmpdir}/${gameName}" "${dosboxdir}/${gameName}"
 		ln -sf "${scriptdir}/dosbox-launcher.sh" "${romdir}/pc/${gameName}.sh" || _error "Failed to create launcher."
 		_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
