@@ -312,7 +312,7 @@ _Install() {
 	#Sanitize game name
 	gameName="${gameName/™/}"
 	gameName="${gameName/©/}"
-	gameName="${gameName//+([[:blank:]])/ }"
+	gameName="${gameName/+([[:blank:]])/ }"
 
 	_extract "${fileSelected}" "${gameName}"
 
