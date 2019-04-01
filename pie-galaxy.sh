@@ -127,34 +127,35 @@ _Library() {
 # Displays the description of a game
 # usage _description "${gameID}"
 _description() {
-	local gameID gameDescription imgArgs gameMetadata gameMetadata
+	local gameID gameDescription imgArgs gameImageURL
 	export gameImage
 	gameID="${1}"
-	gameMetadata="$(curl -s "https://api.gog.com/v2/games/${gameID}?locale=en")"
+	
+	wget --no-clobber "https://api.gog.com/v2/games/${gameID}?locale=en" -O "${tmpdir}/${gameID}.json"
 
 	gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
-	gameDescription="$(jq --raw-output '.description' <<<"${gameMetadata}")"
+	gameDescription="$(jq --raw-output '.description' <"${tmpdir}/${gameID}.json")"
 	gameDescription="$(echo "${gameDescription}" | "${renderhtml[@]}")"
 
 	if type "${gameID}_exception" &>/dev/null; then
 		printf -v gameDescription '%s\n\n%s\n' "Installer for this game found in the exception list" "${gameDescription}"
 
-	elif [[ "$(jq --raw-output '.isUsingDosBox' <<<"${gameMetadata}")" == "true" ]]; then
+	elif [[ "$(jq --raw-output '.isUsingDosBox' <"${tmpdir}/${gameID}.json")" == "true" ]]; then
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by DOSBox" "${gameDescription}"
 
-	elif [[ "$(jq --raw-output '.additionalRequirements' <<<"${gameMetadata}")" == "This game is powered by <a href=http://scummvm.org>ScummVM</a>" ]]; then
+	elif [[ "$(jq --raw-output '.additionalRequirements' <"${tmpdir}/${gameID}.json")" == "This game is powered by <a href=http://scummvm.org>ScummVM</a>" ]]; then
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by ScummVM" "${gameDescription}"
 
-	elif [[ "$(jq --raw-output '._embedded | .publisher | .name' <<<"${gameMetadata}")" == "Cinemaware" ]]; then
+	elif [[ "$(jq --raw-output '._embedded | .publisher | .name' <"${tmpdir}/${gameID}.json")" == "Cinemaware" ]]; then
 		printf -v gameDescription '%s\n\n%s\n' "This is an Amiga game" "${gameDescription}"
 
-	elif [[ "$(jq --raw-output '._embedded | .publisher | .name' <<<"${gameMetadata}")" == "SNK CORPORATION" ]]; then
+	elif [[ "$(jq --raw-output '._embedded | .publisher | .name' <"${tmpdir}/${gameID}.json")" == "SNK CORPORATION" ]]; then
 		printf -v gameDescription '%s\n\n%s\n' "This is a NEO-GEO game" "${gameDescription}"
 	fi
 
 	if [[ "${showImage}" ]]; then
 		imgArgs=(--extra-button --extra-label "Image")
-		gameImageURL="https:$(jq --raw-output '._embedded | .product | ._links | .image | .href' <<<"${gameMetadata}")"
+		gameImageURL="$(jq --raw-output '._embedded | .product | ._links | .image | .href' <"${tmpdir}/${gameID}.json")"
 		#try a bigger resolution
 		gameImageURL="${gameImageURL/_{formatter\}/}"
 	fi
@@ -174,10 +175,9 @@ _description() {
 
 	3)
 		# Image button
-		wget -O "${tmpdir}/${gameID}.${gameImageURL##*.}" "${gameImageURL}"
-		imageCache="${tmpdir}/${gameID}.${gameImageURL##*.}"
-		"${imgViewer[@]}" "${imageCache}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
-		_Library "${selectedGame}" ""
+		wget --no-clobber "${gameImageURL}" -O "${tmpdir}/${gameID}.${gameImageURL##*.}" 
+		"${imgViewer[@]}" "${tmpdir}/${gameID}.${gameImageURL##*.}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
+		_Library "${selectedGame}"
 		;;
 	esac
 }
