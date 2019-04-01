@@ -125,44 +125,38 @@ _Library() {
 }
 
 # Displays the description of a game
-# Checks if game is dosbox or scummvm by curling the store page
 # usage _description "${gameID}"
 _description() {
-	local url page gameID gameDescription imgArgs
+	local gameID gameDescription imgArgs gameMetadata gameMetadata
 	export gameImage
 	gameID="${1}"
-	gameMetadata="$(curl -s "http://api.gog.com/products/${gameID}?expand=description")"
+	gameMetadata="$(curl -s "https://api.gog.com/v2/games/${gameID}?locale=en")"
 
 	gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
-	gameDescription="$(jq --raw-output '.description | .full' <<<"${gameMetadata}")"
+	gameDescription="$(jq --raw-output '.description' <<<"${gameMetadata}")"
 	gameDescription="$(echo "${gameDescription}" | "${renderhtml[@]}")"
-
-	url="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .url' <<<"${wyvernls}")"
-	page="$(curl -s "https://www.gog.com${url}")"
 
 	if type "${gameID}_exception" &>/dev/null; then
 		printf -v gameDescription '%s\n\n%s\n' "Installer for this game found in the exception list" "${gameDescription}"
 
-	elif grep -q "This game is powered by <a href=\"https://www.dosbox.com/\" class=\"dosbox-info__link\">DOSBox" <<<"${page}"; then
+	elif [[ "$(jq --raw-output '.isUsingDosBox' <<<"${gameMetadata}")" == "true" ]]; then
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by DOSBox" "${gameDescription}"
 
-	elif grep -q "This game is powered by <a href=http://scummvm.org>ScummVM" <<<"${page}"; then
+	elif [[ "$(jq --raw-output '.additionalRequirements' <<<"${gameMetadata}")" == "This game is powered by <a href=http://scummvm.org>ScummVM</a>" ]]; then
 		printf -v gameDescription '%s\n\n%s\n' "This game is powered by ScummVM" "${gameDescription}"
 
-	elif grep -q "'Developer: Cinemaware'" <<<"${page}"; then
+	elif [[ "$(jq --raw-output '._embedded | .publisher | .name' <<<"${gameMetadata}")" == "Cinemaware" ]]; then
 		printf -v gameDescription '%s\n\n%s\n' "This is an Amiga game" "${gameDescription}"
 
-	elif grep -q "'Developer: SNK CORPORATION'" <<<"${page}"; then
+	elif [[ "$(jq --raw-output '._embedded | .publisher | .name' <<<"${gameMetadata}")" == "SNK CORPORATION" ]]; then
 		printf -v gameDescription '%s\n\n%s\n' "This is a NEO-GEO game" "${gameDescription}"
 	fi
 
 	if [[ "${showImage}" ]]; then
 		imgArgs=(--extra-button --extra-label "Image")
-		gameImageURL="https:$(jq --raw-output '.images | .logo2x' <<<"${gameMetadata}")"
+		gameImageURL="https:$(jq --raw-output '._embedded | .product | ._links | .image | .href' <<<"${gameMetadata}")"
 		#try a bigger resolution
-		gameImageURL="${gameImageURL/_glx_logo_2x/}"
-		wget -O "${tmpdir}/${gameID}.${gameImageURL##*.}" "${gameImageURL}"
-		imageCache="${tmpdir}/${gameID}.${gameImageURL##*.}"
+		gameImageURL="${gameImageURL/_{formatter\}/}"
 	fi
 
 	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Download" "${imgArgs[@]}" --no-label "Back" --defaultno
@@ -180,6 +174,8 @@ _description() {
 
 	3)
 		# Image button
+		wget -O "${tmpdir}/${gameID}.${gameImageURL##*.}" "${gameImageURL}"
+		imageCache="${tmpdir}/${gameID}.${gameImageURL##*.}"
 		"${imgViewer[@]}" "${imageCache}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
 		_Library "${selectedGame}" ""
 		;;
