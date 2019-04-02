@@ -130,7 +130,7 @@ _description() {
 	local gameID gameDescription imgArgs gameImageURL
 	export gameImage
 	gameID="${1}"
-	
+
 	wget --no-clobber "https://api.gog.com/v2/games/${gameID}?locale=en" -O "${tmpdir}/${gameID}.json"
 
 	gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
@@ -160,7 +160,7 @@ _description() {
 		gameImageURL="${gameImageURL/_{formatter\}/}"
 	fi
 
-	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Download" "${imgArgs[@]}" --no-label "Back" --defaultno
+	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Download" "${imgArgs[@]}" --help-label "Extras" --help-button --no-label "Back" --defaultno
 
 	case "${?}" in
 	0)
@@ -173,9 +173,19 @@ _description() {
 		_Library
 		;;
 
+	2)
+		# Extras Button
+		printf -v availableExtras '%s\n\n%s\n' "Available Extras:" "$(jq --raw-output '._embedded | .bonuses[] | .name' <"${tmpdir}/${gameID}.json")"
+		_yesno "${availableExtras}" --title "${gameName} Extras" --yes-label "Download" --no-label "Back" && (
+			cd "${downdir}" || _error "Unable to traverse to download directory."
+			"${wyvernbin}" extras --all --first "${gameName}" &>"$(tty)"
+		)
+		_Library "${selectedGame}"
+		;;
+
 	3)
 		# Image button
-		wget --no-clobber "${gameImageURL}" -O "${tmpdir}/${gameID}.${gameImageURL##*.}" 
+		wget --no-clobber "${gameImageURL}" -O "${tmpdir}/${gameID}.${gameImageURL##*.}"
 		"${imgViewer[@]}" "${tmpdir}/${gameID}.${gameImageURL##*.}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
 		_Library "${selectedGame}"
 		;;
