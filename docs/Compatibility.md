@@ -6,9 +6,9 @@ This compatiblity list may be moved into the wiki, or another page where people 
 
 ### Ultimate DOOM, The
 
-* Origninally a DOSBox game
-* Installs using lr-prboom (can change it to another source port)
-* script to zip and unzip the savefile to cohere with other games using lr-prboom
+* Originally a DOSBox game, now native
+* Installs using lr-prboom (this can be changed to another source port)
+* Includes a script to zip and unzip the savefile to work with other games using lr-prboom
 * Works
 
 ## DOSBox
@@ -27,6 +27,7 @@ This compatiblity list may be moved into the wiki, or another page where people 
 
 ### Jill of the Jungle - The Complete Trilogy
 
+* abretro recommends checking this game out
 * Installs
 * Keyboard
 * Works
@@ -87,7 +88,8 @@ This compatiblity list may be moved into the wiki, or another page where people 
 
 ## ScummVM
 
-Reccomend lr-scummvm for automatic shortcut and gamepad support pre-setup.
+Install and use lr-scummvm for automatic shortcut and gamepad support pre-setup.
+
 
 ### Beneath the Steel sky
 
