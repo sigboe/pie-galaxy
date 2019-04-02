@@ -366,7 +366,7 @@ _Install() {
 
 		fi
 
-		if [[ -f "${romdir}/neogeo/neogeo.zip" ]] && _yesno "neogeo.zip already existsts in ${romdir}/neogeo/\n\nDo you want to overwrite?"; then
+		if [[ -f "${romdir}/neogeo/neogeo.zip" ]] && _yesno "neogeo.zip already existsts in ${romdir}/neogeo/\n\nDo you want to overwrite?" --defaultno; then
 			cp -f "${tmpdir}/${gameName}/game/neogeo.zip" "${romdir}/neogeo/"
 
 		else
@@ -375,11 +375,24 @@ _Install() {
 
 		if [[ "$(find "${tmpdir}/${gameName}" -name '*.zip' ! -name 'neogeo.zip' | wc -l)" == "1" ]]; then
 			cp "$(find "${tmpdir}/${gameName}" -name '*.zip' ! -name 'neogeo.zip')" "${romdir}/neogeo/"
-			_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
 
 		else
-			_error "Game not supported yet."
-			return
+			if [[ -f "${tmpdir}/${gameName}/game/kof2000.zip" ]]; then
+				cp "${tmpdir}/${gameName}/game/kof2000.zip" "${romdir}/neogeo/"
+
+			elif [[ -f "${tmpdir}/${gameName}/game/kof2002.zip" ]]; then
+				cp "${tmpdir}/${gameName}/game/kof2002.zip" "${romdir}/neogeo/"
+
+			elif [[ -f "${tmpdir}/${gameName}/game/samsh5sp.zip" ]]; then
+				cp "${tmpdir}/${gameName}/game/samsh5sp.zip" "${romdir}/neogeo/"
+
+			else
+				_error "Game not supported yet."
+				return
+			fi
+
+			_msgbox "GOG.com game ID: ${gameID}\n$(basename "${fileSelected}") was extracted and installed to ${dosboxdir}" --title "${gameName} was installed."
+
 		fi
 		;;
 
