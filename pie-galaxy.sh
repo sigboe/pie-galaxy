@@ -160,7 +160,7 @@ _description() {
 		gameImageURL="${gameImageURL/_{formatter\}/}"
 	fi
 
-	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Download" "${imgArgs[@]}" --help-label "Extras" --help-button --no-label "Back" --defaultno
+	_yesno "${gameDescription}" --title "${gameName}" --ok-label "Download" "${imgArgs[@]}" --help-label "Extras" --help-button --cancel-label "Back" --defaultno
 
 	case "${?}" in
 	0)
