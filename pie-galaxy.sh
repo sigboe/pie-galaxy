@@ -131,7 +131,7 @@ _description() {
 	export gameImage
 	gameID="${1}"
 
-	wget --no-clobber "https://api.gog.com/v2/games/${gameID}?locale=en" -O "${tmpdir}/${gameID}.json"
+	[[ ! -f "${tmpdir}/${gameID}.json" ]] && curl -s "https://api.gog.com/v2/games/${gameID}?locale=en" > "${tmpdir}/${gameID}.json"
 
 	gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
 	gameDescription="$(jq --raw-output '.description' <"${tmpdir}/${gameID}.json")"
@@ -185,7 +185,7 @@ _description() {
 
 	3)
 		# Image button
-		wget --no-clobber "${gameImageURL}" -O "${tmpdir}/${gameID}.${gameImageURL##*.}"
+		[[ ! -f "${tmpdir}/${gameID}.${gameImageURL##*.}" ]] && curl -s "${gameImageURL}" > "${tmpdir}/${gameID}.${gameImageURL##*.}"
 		"${imgViewer[@]}" "${tmpdir}/${gameID}.${gameImageURL##*.}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
 		_Library "${selectedGame}"
 		;;
