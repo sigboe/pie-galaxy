@@ -59,6 +59,15 @@ _depends() {
 		_exit 1
 	fi
 
+	# Possibly temporary fix
+	if grep -q "wyvern-1.3.0-armv7" "${HOME}/RetroPie-Setup/scriptmodules/ports/piegalaxy.sh"; then
+		curl -s "https://raw.githubusercontent.com/sigboe/pie-galaxy/master/scriptmodule.sh" > "${HOME}/RetroPie-Setup/scriptmodules/ports/piegalaxy.sh"
+		sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" piegalaxy || { _error "Could not update self, try to update Pie-Galaxy manually"; _exit; }
+		_msgbox "Found old updater, fetched the new updater and ran it. Please restart Pie-Galaxy"
+		_exit
+
+	fi
+
 	if ! [[ -x "${wyvernbin}" ]]; then
 		_error "Wyvern not installed." 1
 	fi
