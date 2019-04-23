@@ -61,8 +61,11 @@ _depends() {
 
 	# Possibly temporary fix
 	if grep -q "wyvern-1.3.0-armv7" "${HOME}/RetroPie-Setup/scriptmodules/ports/piegalaxy.sh"; then
-		curl -s "https://raw.githubusercontent.com/sigboe/pie-galaxy/master/scriptmodule.sh" > "${HOME}/RetroPie-Setup/scriptmodules/ports/piegalaxy.sh"
-		sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" piegalaxy || { _error "Could not update self, try to update Pie-Galaxy manually"; _exit; }
+		curl -s "https://raw.githubusercontent.com/sigboe/pie-galaxy/master/scriptmodule.sh" >"${HOME}/RetroPie-Setup/scriptmodules/ports/piegalaxy.sh"
+		sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" piegalaxy || {
+			_error "Could not update self, try to update Pie-Galaxy manually"
+			_exit
+		}
 		_msgbox "Found old updater, fetched the new updater and ran it. Please restart Pie-Galaxy"
 		_exit
 
@@ -140,7 +143,7 @@ _description() {
 	export gameImage
 	gameID="${1}"
 
-	[[ ! -f "${tmpdir}/${gameID}.json" ]] && curl -s "https://api.gog.com/v2/games/${gameID}?locale=en" > "${tmpdir}/${gameID}.json"
+	[[ ! -f "${tmpdir}/${gameID}.json" ]] && curl -s "https://api.gog.com/v2/games/${gameID}?locale=en" >"${tmpdir}/${gameID}.json"
 
 	gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
 	gameDescription="$(jq --raw-output '.description' <"${tmpdir}/${gameID}.json")"
@@ -190,7 +193,7 @@ _description() {
 
 	3)
 		# Image button
-		[[ ! -f "${tmpdir}/${gameID}.${gameImageURL##*.}" ]] && curl -s "${gameImageURL}" > "${tmpdir}/${gameID}.${gameImageURL##*.}"
+		[[ ! -f "${tmpdir}/${gameID}.${gameImageURL##*.}" ]] && curl -s "${gameImageURL}" >"${tmpdir}/${gameID}.${gameImageURL##*.}"
 		"${imgViewer[@]}" "${tmpdir}/${gameID}.${gameImageURL##*.}" </dev/tty &>/dev/null || _error "Image viewer failed\n${imgViewer[0]} exited with with exit code ${?}"
 		_Library "${selectedGame}"
 		;;
@@ -199,21 +202,21 @@ _description() {
 
 #List and download extras for a game
 _extras() {
-		local gameID gameName extrasList selectedExtra
-		gameID="${1}"
-		gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
-		mapfile -t extrasList < <(jq --raw-output '._embedded | .bonuses[] | .name, .type.slug' <"${tmpdir}/${gameID}.json")
-		if [[ "${#extrasList[@]}" != "0" ]]; then
-			selectedExtra="$(dialog \
+	local gameID gameName extrasList selectedExtra
+	gameID="${1}"
+	gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
+	mapfile -t extrasList < <(jq --raw-output '._embedded | .bonuses[] | .name, .type.slug' <"${tmpdir}/${gameID}.json")
+	if [[ "${#extrasList[@]}" != "0" ]]; then
+		selectedExtra="$(dialog \
 			--backtitle "${title}" \
 			--ok-label "Download" \
 			--cancel-label "Back" \
 			--menu "Download bonus content for ${gameName}" \
 			22 77 16 "${extrasList[@]}" 3>&1 1>&2 2>&3 >"$(tty)")"
-			"${wyvernbin}" extras --id "${gameID}" --slug "${selectedExtra}" --output-folder "${downdir}" &>"$(tty)"
-		else
-			_msgbox "There are no extras available for ${gameName}."
-		fi
+		"${wyvernbin}" extras --id "${gameID}" --slug "${selectedExtra}" --output-folder "${downdir}" &>"$(tty)"
+	else
+		_msgbox "There are no extras available for ${gameName}."
+	fi
 
 }
 
