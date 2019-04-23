@@ -175,11 +175,7 @@ _description() {
 
 	2)
 		# Extras Button
-		printf -v availableExtras '%s\n\n%s\n' "Available Extras:" "$(jq --raw-output '._embedded | .bonuses[] | .name' <"${tmpdir}/${gameID}.json")"
-		_yesno "${availableExtras}" --title "${gameName} Extras" --yes-label "Download" --no-label "Back" && (
-			cd "${downdir}" || _error "Unable to traverse to download directory."
-			"${wyvernbin}" extras --all --first "${gameName}" &>"$(tty)"
-		)
+		_extras "${gameID}"
 		_Library "${selectedGame}"
 		;;
 
@@ -190,6 +186,26 @@ _description() {
 		_Library "${selectedGame}"
 		;;
 	esac
+}
+
+#List and download extras for a game
+_extras() {
+		local gameID gameName extrasList selectedExtra
+		gameID="${1}"
+		gameName="$(jq --raw-output --argjson var "${gameID}" '.games[] | .ProductInfo | select(.id==$var) | .title' <<<"${wyvernls}")"
+		mapfile -t extrasList < <(jq --raw-output '._embedded | .bonuses[] | .name, .type.slug' <"${tmpdir}/${gameID}.json")
+		if [[ "${#extrasList[@]}" != "0" ]]; then
+			selectedExtra="$(dialog \
+			--backtitle "${title}" \
+			--ok-label "Download" \
+			--cancel-label "Back" \
+			--menu "Download bonus content for ${gameName}" \
+			22 77 16 "${extrasList[@]}" 3>&1 1>&2 2>&3 >"$(tty)")"
+			"${wyvernbin}" extras --id "${gameID}" --slug "${selectedExtra}" --output-folder "${downdir}" &>"$(tty)"
+		else
+			_msgbox "There are no extras available for ${gameName}."
+		fi
+
 }
 
 _Connect() {
