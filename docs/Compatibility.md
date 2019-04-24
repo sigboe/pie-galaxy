@@ -88,8 +88,7 @@ This compatiblity list may be moved into the wiki, or another page where people 
 
 ## ScummVM
 
-Install and use lr-scummvm for automatic shortcut and gamepad support pre-setup.
-
+Use lr-scummvm for automatic shortcuts and ready to go gamepad support.  lr-scummvm is not installed on RetroPie by default but is available as a package.
 
 ### Beneath the Steel sky
 
@@ -124,7 +123,7 @@ Install and use lr-scummvm for automatic shortcut and gamepad support pre-setup.
 ### Escape from Monkey Island
 
 * Installs
-* select the .exe in the installer
+* Select the .exe in the installer
 * Need to add the game in the ResidualVM menu
 * Keyboard
 * Works
