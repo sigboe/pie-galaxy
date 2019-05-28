@@ -251,8 +251,66 @@ _checklogin() {
 		wyvernls="$(timeout 30 "${wyvernbin}" ls --json)" || _error "It took longer than 30 seconds. You may need to log in again.\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
 
 	else
-		_error "You are not logged into wyvern\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
+		_login
 	fi
+}
+
+_login() {
+	local userEmail userPassword tokenCode
+
+	{
+		read -r userEmail
+		read -r userPassword
+		read -r returncode
+	} < <(
+		dialog --title "Login" \
+			--ok-label "Submit" \
+			--backtitle "${title}" \
+			--insecure \
+			--extra-button --extra-label "Code" \
+			--mixedform "You are not logged in to GOG.com, you have two login options. Login with code (Most suitable for use via SSH), go to https://bit.ly/2JZlT15 which redirects to login.gog.com (please make sure that you get to the correct site). Then pick code in the form and enter your login code. Or login via email and password below." \
+			22 77 0 \
+			"Email    :" 1 1 "" 1 12 90 0 0 \
+			"Password :" 2 1 "" 2 12 90 0 1 \
+			3>&1 1>&2 2>&3 >"$(tty)"
+		echo "${?}"
+	)
+
+	# if returncode 1 or 255 is returned, it will be put into the email variable instead, this compensates for that.
+	[[ "${userEmail}" =~ ^[0-9]+$ ]] && returncode="${userEmail}"
+
+	case "${returncode}" in
+	0)
+		#routine for login with username and password
+		if [[ "${userEmail}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]] && [[ -n "${userPassword}" ]]; then
+			#valid email address format and password not empty, trying to log in
+			"${wyvernbin}" login --username "${userEmail}" --password "${userPassword}"
+			grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml" && _yesno "Login unsuccesfull. Try again with same credentials?" && "${wyvernbin}" login --username "${userEmail}" --password "${userPassword}"
+			_checklogin
+			unset userPassword userEmail
+		else
+			[[ "${userEmail}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]] && _error "Email provided does not have a valid format, login not attempted."
+			[[ -n "${userPassword}" ]] && _error "Password field is empty, login not attempted."
+			unset userPassword userEmail
+			_login
+		fi
+		;;
+	3)
+		# routine for login with code
+		tokenCode="$(dialog \
+			--title "Code" --ok-label "Submit" \
+			--backtitle "${title}" --inputbox "To get the login token code, go to https://bit.ly/2JZlT15 make sure that you got redirected to login.gog.com. The code will appear in the address field. Its easier to enter this via ssh, your Pi's IP address is: xxx.xxx.xxx.xxx" \
+			22 77 "" 3>&1 1>&2 2>&3 >"$(tty)")"
+		"${wyvernbin}" login --code "${tokenCode}"
+		_checklogin
+		unset tokenCode
+		;;
+	1 | 255)
+		_exit 1
+		;;
+	esac
+
+	unset userPassword userEmail tokenCode
 }
 
 _About() {
