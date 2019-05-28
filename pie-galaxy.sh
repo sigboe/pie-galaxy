@@ -306,6 +306,7 @@ _login() {
 		unset tokenCode
 		;;
 	1 | 255)
+		unset userPassword userEmail tokenCode
 		_exit 1
 		;;
 	esac
