@@ -2,27 +2,28 @@
 
 # Pie Galaxy
 
-A GOG client for RetroPie and other GNU/Linux distributions. It uses [Wyvern](https://github.com/nicohman/wyvern/) to download and [Innoextract](https://github.com/dscharrer/innoextract) to extract games. Pie Galaxy also provides a user interface navigable by game controllers and will install games in such a way that it will use native runtimes. It also uses Wyvern to let you claim games available from [GOG Connect](https://gog.com/connect).
+Pie Galaxy is a GOG client package for RetroPie and other GNU/Linux distributions.  It will download and install the platform native binary or emulated game onto a RetroPie system.
 
-Pie Galaxy does not support every game yet, and is not feature complete. And is provided without warranty.
+Pie Galaxy does not support every GOG game (yet!), and is not feature complete.  Pie Galaxy is provided without any warranty - use at your own enjoyment.
 
 ![](resources/demo.gif)
 
 ## Installing
 
-Hopefully you will be able to install this program from the RetroPie setup menu soon.
+We hope that you will be able to install this program from the RetroPie setup menu someday, 
 [Untill then read here](Install.md)
 
 ## Features
 
+* Menu navigation via game controllers
+* Download any game you own from the GOG library
+* List all the games with their descriptions from your GOG library
 * Claim games available from GOG connect
-* List all the games you own, and read their description
-* Download any game you own
-* Install games ([See compatibility list](Compatibility.md) shortlist below.)
+* Installs games ([See compatibility list](Compatibility.md) shortlist below.)
+* Uses [Wyvern](https://github.com/nicohman/wyvern/) to download and for GOG Connect
+* Uses [Innoextract](https://github.com/dscharrer/innoextract) to extract games
 
 ## Compatibility
-
-Summary:
 
 * DOSBox games
 * ScummVM games
@@ -31,20 +32,20 @@ Summary:
 * Amiga games
   * may have some issues still
 * NEO-GEO games (Almost all)
-* Native games
+* Native (arm on pi) games
   * Ultimate DOOM, The
 
 ## Todo
 
 ### Soon
 
-* More Native games
+* More "Platform Native" (no emulator) games
 
-### Furture
+### Future
 
 * Sync savegames
-* Gamepad for more games
-* Automatic notification when Connect games are available
+* Gamepad support for more games
+* Automatic notification when GOG Connect games are available
 
 ### Research
 
@@ -55,12 +56,15 @@ Summary:
   * List friends online status
   * Maybe more
 
-## Contribution
+## Contributing
 
 There are a number of ways you can contribute.
 
-For regular users, please file bugreports if you find any bugs. Please put in as much detail as you can. If you want to learn how Github works, maybe you can open a pull request fixing any typos in the documentation. :D
+For regular users, please file a bug report if you find a bug. Be sure to include as much detail as you can, including RetroPie version, pi hardware version, and if possible a verbatim capture of the error message, where a copy of the text is preferred to a png of the error.
 
-For technical users, maybe you can contribute to the exceptions list. I also welcome pull requests to the code base. Or even just code review/commenting on the code.
+If you want to learn how Github works, maybe you can open a pull request fixing any typos in the documentation. :D
 
-If you really want do do a monitary contribution, the only thing I would have a heart to accept is GOG.com gifts. If you seriously want to do a monitary contribution, you can contact me on [reddit/u/sigb](https://reddit.com/u/sigb), if you want me to work on a specific game, maybe we can do some basic information gathering before spending any money to check the feasability of getting it to work.
+For technical users, this project needs more pull requests for the exceptions list.  I also welcome pull requests to the code base, code reviews, and even pull requests that are nothing more than a clearer comment.
+
+If you feel the need to give a monetary contribution, the only thing I have a heart to accept are GOG.com gifts.  If you seriously want to do a monetary contribution, you can contact me on [reddit/u/sigb](https://reddit.com/u/sigb).  Contact me for specific requests to determine the feasbility of making the GOG game work, Thank You!
+

@@ -8,12 +8,12 @@
 # ${biosdir}            Folder for BIOS roms
 # ${dosboxdir}          ${romdir}/pc
 # ${scummvmdir}         ${romdir}/scummvm
-# You can write error messages for commands that fail by ending the command like so || _error "What failed and why"
+# Error messages can be customized for commands that failed by ending the command with an OR, like so:  || _error "Custom error message"
 
 1435827232_exception() { #Ultimate DOOM, The
     sudo apt install zip
-    mkdir -p "${romdir}/ports/doom" || { _error "Could not create folder ${romdir}/ports/doom"; return; }
-    cp "${tmpdir}/${gameName}/DOOM.WAD" "${romdir}/ports/doom/" || { _error "Could not copy DOOM.WAD to install directory"; return; }
+    mkdir -p "${romdir}/ports/doom" || { _error "Could not create directory ${romdir}/ports/doom"; return; }
+    cp "${tmpdir}/${gameName}/DOOM.WAD" "${romdir}/ports/doom/" || { _error "Could not copy DOOM.WAD to installation directory"; return; }
 
     cat <<'_EOF_' >>"${romdir}/ports/Ultimate Doom.sh"
 #!/usr/bin/env bash
@@ -21,20 +21,20 @@
 path="/home/pi/RetroPie/roms/ports/doom"
 wadfile="DOOM.WAD"
 if ! [[ -e "${path}/$wadfile" ]]; then
-echo "Error! ${path}/$wadfile not found!"
-echo "Please resolve problem in script or install file!"
-sleep 10
-exit
+    echo "Error! ${path}/$wadfile not found!"
+    echo "Is there a problem in the script or the installation file?"
+    sleep 10
+    exit
 fi
 if [[ -e "${path}/savegames_${wadfile%.*}.zip" ]]; then
-unzip -qq -o "${path}/savegames_${wadfile%.*}.zip" -d "$path"
+    unzip -qq -o "${path}/savegames_${wadfile%.*}.zip" -d "$path"
 fi
 "/opt/retropie/supplementary/runcommand/runcommand.sh" 0 _PORT_ "doom" "${path}/$wadfile"
 cd "$path" && zip -mj "savegames_${wadfile%.*}.zip" prbmsav?.dsg
 _EOF_
 
-    chmod +x "${romdir}/ports/Ultimate Doom.sh" || { _error "Could not create install script"; return; }
-    if _yesno "${gameName} has been installed to ${romdir}/ports/doom.\nSelect yes to build libretro PrBoom, to use as the engine.\nSelect No to skip build."; then
+    chmod +x "${romdir}/ports/Ultimate Doom.sh" || { _error "Could not create the installation script"; return; }
+    if _yesno "${gameName} has been installed to ${romdir}/ports/doom.\nSelect yes to build and use libretro PrBoom as the engine.\nSelect No to skip the build."; then
         sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" lr-prboom || { _error "Could not install lr-prboom"; return; }
     fi
     _msgbox "${gameName} is installed to work with PrBoom, with seperated savgame.\n\nMake sure to enable lr-prboom as your DOOM engine, in the runcommand."
