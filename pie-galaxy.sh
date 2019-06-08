@@ -268,7 +268,8 @@ _login() {
 			--backtitle "${title}" \
 			--insecure \
 			--extra-button --extra-label "Code" \
-			--mixedform "You are not logged in to GOG.com, you have two login options. Login with code (Most suitable for use via SSH), go to https://bit.ly/2JZlT15 which redirects to login.gog.com (please make sure that you get to the correct site). Then pick code in the form and enter your login code. Or login via email and password below." \
+			--colors \
+			--mixedform "Login to \ZbGOG.com\ZB required, you have two login options.\nLogin with code (Most suitable for use via SSH).\nOr login via email and password below (beta).\nThe Password is not stored." \
 			22 77 0 \
 			"Email    :" 1 1 "" 1 12 90 0 0 \
 			"Password :" 2 1 "" 2 12 90 0 1 \
@@ -285,12 +286,12 @@ _login() {
 		if [[ "${userEmail}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]] && [[ -n "${userPassword}" ]]; then
 			#valid email address format and password not empty, trying to log in
 			"${wyvernbin}" login --username "${userEmail}" --password "${userPassword}"
-			grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml" && _yesno "Login unsuccesfull. Try again with same credentials?" && "${wyvernbin}" login --username "${userEmail}" --password "${userPassword}"
+			grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml" && _yesno "Login unsuccesfull (Beta feature). Try again with same credentials?" && "${wyvernbin}" login --username "${userEmail}" --password "${userPassword}"
 			_checklogin
 			unset userPassword userEmail
 		else
-			[[ "${userEmail}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]] && _error "Email provided does not have a valid format, login not attempted."
-			[[ -n "${userPassword}" ]] && _error "Password field is empty, login not attempted."
+			[[ ! "${userEmail}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]] && _error "Email provided does not have a valid format, login not attempted."
+			[[ -z "${userPassword}" ]] && _error "Password field is empty, login not attempted."
 			unset userPassword userEmail
 			_login
 		fi
@@ -299,7 +300,8 @@ _login() {
 		# routine for login with code
 		tokenCode="$(dialog \
 			--title "Code" --ok-label "Submit" \
-			--backtitle "${title}" --inputbox "To get the login token code, go to https://bit.ly/2JZlT15 make sure that you got redirected to login.gog.com. The code will appear in the address field. Its easier to enter this via ssh, your Pi's IP address is: xxx.xxx.xxx.xxx" \
+			--colors \
+			--backtitle "${title}" --inputbox "To get the login token code, go to \Zubit.ly/gogcode\ZU\nMake sure that you got redirected to \Z2login.gog.com\Zn.\nThe code will appear in the address field behind the text \Zu&code=\ZU after you log in.\n\nIt's easier to enter the code via via ssh, your Pi's IP address is:\n$(getIPAddress)\nRun Pie-Galaxy by typing:\n./RetroPie/roms/ports/Pie\\ Galaxy.sh" \
 			22 77 "" 3>&1 1>&2 2>&3 >"$(tty)")"
 		"${wyvernbin}" login --code "${tokenCode}"
 		_checklogin
