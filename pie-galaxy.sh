@@ -285,7 +285,7 @@ _login() {
 		#routine for login with username and password
 		if [[ "${userEmail}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]] && [[ -n "${userPassword}" ]]; then
 			#valid email address format and password not empty, trying to log in
-			"${wyvernbin}" login --username "${userEmail}" --password "${userPassword}"
+			"${wyvernbin}" login --username "${userEmail}" --password "${userPassword}" &>"$(tty)"
 			grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml" && _yesno "Login unsuccesfull (Beta feature). Try again with same credentials?" && "${wyvernbin}" login --username "${userEmail}" --password "${userPassword}"
 			_checklogin
 			unset userPassword userEmail
