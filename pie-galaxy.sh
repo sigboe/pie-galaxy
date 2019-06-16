@@ -97,7 +97,7 @@ main() {
 		"Connect" "Operations associated with GOG Connect"
 		"Library" "List all games you own"
 		"Install" "Install a GOG game from an installer"
-		"Sync" "Sync a game's saves to a specific location for backup"
+		"Settings" "Options for ${title}"
 		"About" "About this program"
 	)
 
@@ -334,8 +334,24 @@ _EOF_
 	_msgbox "${about}" --title "About"
 }
 
-_Sync() {
-	_msgbox "This feature is not written yet for RetroPie."
+_Settings() {
+	local settingsMenuOptions settingsSelected
+
+	settingsMenuOptions=(
+		"Logout" "Logout of ${title}"
+	)
+
+	settingsSelected="$(dialog \
+		--backtitle "${title}" \
+		--cancel-label "Back" \
+		--default-item "${selected}" \
+		--menu "Choose one" \
+		22 77 16 "${settingsMenuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)")"
+
+	if [[ "${settingsSelected}" == "Logout" ]]; then
+		rm "${HOME}/.config/wyvern/wyvern.toml"
+		_exit
+	fi
 }
 
 _Install() {
