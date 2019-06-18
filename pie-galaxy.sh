@@ -248,7 +248,7 @@ _Download() {
 
 _checklogin() {
 	if grep -q "access_token =" "${HOME}/.config/wyvern/wyvern.toml"; then
-		wyvernls="$(timeout 30 "${wyvernbin}" ls --json)" || _error "It took longer than 30 seconds. You may need to log in again.\nLogging inn via this UI is not yet developed.\nRight now its easier if you ssh into the RaspberryPie and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
+		wyvernls="$(timeout 30 "${wyvernbin}" ls --json)" || _error "It took longer than 30 seconds. You may need to log in again.\nLogging in via this UI is not yet developed.\nits easier if you ssh into the Raspberry Pi and run\n\n${wyvernbin} ls\n\nand follow the instructions to login." 1
 
 	else
 		_login
@@ -269,7 +269,7 @@ _login() {
 			--insecure \
 			--extra-button --extra-label "Code" \
 			--colors \
-			--mixedform "Login to \ZbGOG.com\ZB required, you have two login options.\nLogin with code (Most suitable for use via SSH).\nOr login via email and password below (beta).\nThe Password is not stored." \
+			--mixedform "Login to \ZbGOG.com\ZB required, you have two login options.\nLogin with a code (for use via SSH, etc.).\nOr login via email and password below (beta).\nThe Password is never stored." \
 			22 77 0 \
 			"Email    :" 1 1 "" 1 12 90 0 0 \
 			"Password :" 2 1 "" 2 12 90 0 1 \
@@ -290,8 +290,8 @@ _login() {
 			_checklogin
 			unset userPassword userEmail
 		else
-			[[ ! "${userEmail}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]] && _error "Email provided does not have a valid format, login not attempted."
-			[[ -z "${userPassword}" ]] && _error "Password field is empty, login not attempted."
+			[[ ! "${userEmail}" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]] && _error "Email provided does not have a valid format! Login not attempted."
+			[[ -z "${userPassword}" ]] && _error "Password field is empty!  Login not attempted."
 			unset userPassword userEmail
 			_login
 		fi
@@ -301,7 +301,7 @@ _login() {
 		tokenCode="$(dialog \
 			--title "Code" --ok-label "Submit" \
 			--colors \
-			--backtitle "${title}" --inputbox "To get the login token code, go to \Zubit.ly/gogcode\ZU\nMake sure that you got redirected to \Z2login.gog.com\Zn.\nThe code will appear in the address field behind the text \Zu&code=\ZU after you log in.\n\nIt's easier to enter the code via via ssh, your Pi's IP address is:\n$(getIPAddress)\nRun Pie-Galaxy by typing:\n./RetroPie/roms/ports/Pie\\ Galaxy.sh" \
+			--backtitle "${title}" --inputbox "To get the login token codes, go to \Zubit.ly/gogcode\ZU\nMake sure that you are redirected to \Z2login.gog.com\Zn.\nThe code will appear in the address field behind the text \Zu&code=\ZU after log in.\n\nIt may be easier to enter the code via via ssh.  This Pi has an IP address of:\n$(getIPAddress)\nRun Pie-Galaxy by typing:\n./RetroPie/roms/ports/Pie\\ Galaxy.sh" \
 			22 77 "" 3>&1 1>&2 2>&3 >"$(tty)")"
 		"${wyvernbin}" login --code "${tokenCode}"
 		_checklogin
@@ -398,7 +398,7 @@ _Install() {
 	3)
 		#delete
 		rm "${fileSelected}" || {
-			_error "unable to delete file"
+			_error "Unable to delete file!!"
 			return
 		}
 		_msgbox "${fileSelected} deleted."
@@ -417,7 +417,7 @@ _Install() {
 	fi
 
 	[[ -z "${gameID}" ]] && {
-		_error "Can't figure out the Game ID. Aborting installation."
+		_error "Cannot determine Game ID,  aborting installation."
 		return
 	}
 
@@ -443,7 +443,7 @@ _Install() {
 
 	"dosbox")
 		[[ -d "${dosboxdir}" ]] || {
-			_error "Unable to copy game to ${dosboxdir}\n\nThis is likely due to DOSBox not being installed."
+			_error "Unable to copy game to ${dosboxdir}\n\nThis is probably means DOSBox is not installed.  Please install DOSBox to continue.  At the command line, type "sudo apt-get install dosbox"
 			return
 		}
 		[[ ! -d "${dosboxdir}/gog" ]] && mkdir -p "${dosboxdir}/gog"
@@ -458,7 +458,7 @@ _Install() {
 
 		[[ "${extension,,}" == "sh" ]] && subdir="/data"
 		mv -f "${tmpdir}/${gameName}${subdir}" "${scummvmdir}/${gameName}.svm" || {
-			_error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to ScummVM not being installed."
+			_error "Uname to copy game to ${scummvmdir}\n\nThis is likely due to no installation of ScummVM."
 			return
 		}
 		echo "${shortName}" >"${scummvmdir}/${gameName}.svm/${shortName}.svm"
@@ -577,7 +577,7 @@ _getType() {
 		type="neogeo"
 
 	else
-		_error "Didn't find what game it was.\nNot installing."
+		_error "Did not find what game it was.\nNot installing."
 		return
 	fi
 
