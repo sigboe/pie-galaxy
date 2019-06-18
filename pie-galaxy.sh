@@ -446,7 +446,7 @@ _Install() {
 
 	"dosbox")
 		[[ -d "${dosboxdir}" ]] || {
-			_error "Unable to copy game to ${dosboxdir}\n\nThis is probably means DOSBox is not installed.  Please install DOSBox to continue.  At the command line, type "sudo apt-get install dosbox"
+			_error "Unable to copy game to ${dosboxdir}\n\nThis is probably means DOSBox is not installed.  Please install DOSBox to continue.  At the command line, type sudo apt-get install dosbox"
 			return
 		}
 		[[ ! -d "${dosboxdir}/gog" ]] && mkdir -p "${dosboxdir}/gog"
