@@ -348,10 +348,13 @@ _Settings() {
 		--menu "Choose one" \
 		22 77 16 "${settingsMenuOptions[@]}" 3>&1 1>&2 2>&3 >"$(tty)")"
 
-	if [[ "${settingsSelected}" == "Logout" ]]; then
-		rm "${HOME}/.config/wyvern/wyvern.toml"
-		_exit
-	fi
+	case "${settingsSelected}" in
+		Logout)
+			rm "${HOME}/.config/wyvern/wyvern.toml"
+			_exit
+		;;
+	esac
+	
 }
 
 _Install() {
