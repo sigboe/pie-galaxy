@@ -68,3 +68,7 @@ For technical users, this project needs more pull requests for the exceptions li
 
 If you feel the need to give a monetary contribution, the only thing I have a heart to accept are GOG.com gifts.  If you seriously want to do a monetary contribution, you can contact me on [reddit/u/sigb](https://reddit.com/u/sigb).  Contact me for specific requests to determine the feasbility of making the GOG game work, Thank You!
 
+#### Notable contributors
+
+[abretro](https://github.com/abretro) Improving language and consulting
+[MajorDangerNine](https://github.com/MajorDangerNine) Testing and research
