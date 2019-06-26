@@ -71,4 +71,5 @@ If you feel the need to give a monetary contribution, the only thing I have a he
 #### Notable contributors
 
 [abretro](https://github.com/abretro) Improving language and consulting
+
 [MajorDangerNine](https://github.com/MajorDangerNine) Testing and research
