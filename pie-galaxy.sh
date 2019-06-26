@@ -24,7 +24,7 @@ retropiehelper="${HOME}/RetroPie-Setup/scriptmodules/helpers.sh"
 configfile="${HOME}/.config/piegalaxy/piegalaxy.conf"
 fullFileBrowser="false"
 showImage="true"
-version="0.2"
+version="0.4"
 
 # fix UTF-8 symbols like © or ™
 export LC_ALL=C.UTF-8
