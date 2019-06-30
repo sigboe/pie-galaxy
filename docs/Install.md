@@ -24,7 +24,7 @@ Default RetroPie password: raspberry
 
 open a terminal and type:
 
-   ssh pi@<IP-Address>
+   ssh pi@\<IP-Address\>
 
 ### Windows
 
@@ -45,51 +45,36 @@ You need to make sure you have a recent retropie-setup version.
 1. Update the retropie_setup script
 
 - run the command:
-sudo 
+
+```
+sudo Retropie-Setup/retropie_setup.sh
+```
 
 - then select "Update" from the menu, and follow the prompts
 
 - If you update the underlying OS packages as well, be sure to reboot before expecting things to work
 
-
-
-
 2. Download the packagefile
 
-    wget -O "${HOME}/RetroPie-Setup/scriptmodules/ports/piegalaxy.sh" https://raw.githubusercontent.com/sigboe/pie-galaxy/master/scriptmodule.sh
+```
+wget -O "${HOME}/RetroPie-Setup/scriptmodules/ports/piegalaxy.sh" https://raw.githubusercontent.com/sigboe/pie-galaxy/master/scriptmodule.sh
+```
 
 3. Run the package installer
 
-    sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" piegalaxy
+```
+sudo "${HOME}/RetroPie-Setup/retropie_packages.sh" piegalaxy
+```
 
-4. Follow the configuration steps (below) before you disconnect from SSH
+### Logging in with a keyboard
 
+1. connect a keyboard to your Raspbery Pi and open Retro Pie from emulation station
 
-## Configuration
+### Loggin in via SSH
 
-Open a URL in any webbrowser, then copy and paste a token from a url into an ssh session into RetroPie running Pie Galaxy.
+1. Open Pie Galaxy by running the following command
 
-
-### Configuration steps
-
-1. Generate the url
-
-while ssh'd into RetroPie, run:
-/opt/retropie/ports/piegalaxy/wyvern ls
-
-2. Visit the url in a browser
-
-3. After log in, there should be a blank site.  
-
-Notice that the url changed.   The token is in the new URL!  Copy everything after "code=" and paste it back into the SSH client.
-
-4. There should be a list of all of your GOG games.  
-
-If not, revisit the Configuration steps 1-3, or troubleshoot basics (is there Internet connectivity in order to reach GOG?  Can the Pi reach the Internet? etc.)
-
-5. Once you see the list, restart
-
-Restart EmulationStation, or Reboot the RetroPie system
-
-6. The program will show up in EmulationStation under the Ports menu
-
+```
+~/RetroPie/roms/ports/Pie\ Galaxy.sh
+```
+2. login using email and password or via code.
