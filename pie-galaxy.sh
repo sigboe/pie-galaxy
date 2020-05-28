@@ -40,7 +40,7 @@ fi
 
 # Read config file and sanitize input. If you want to change the defaults.
 if [[ -f "${configfile}" ]]; then
-	if grep -E -q -v '^#|^[^ ]*=[^;]*' "{$configfile}"; then
+	if grep -E -q -v '^#|^[^ ]*=[^;]*' "${configfile}"; then
 		echo "Config file is unclean, cleaning it..." >&2
 		mv "${configfile}" "$(dirname "${configfile}")/dirty.conf"
 		grep -E '^#|^[^ ]*=[^;&]*' "$(dirname "${configfile}")/dirty.conf" >"${configfile}"
